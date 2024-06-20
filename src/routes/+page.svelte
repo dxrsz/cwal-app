@@ -1,9 +1,12 @@
-<script>
+<script lang="ts">
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { listen } from '@tauri-apps/api/event';
+	import { onDestroy } from 'svelte';
+
+	let unlisten: () => void;
 
 	(async () => {
-		const unlisten = await listen('scr-event', (event) => {
+		unlisten = await listen('scr-event', (event: any) => {
 			console.log('click event', event.payload);
 
 			if (event.payload.ProfileSelect) {
@@ -18,6 +21,12 @@
 			}
 		});
 	})();
+
+	onDestroy(() => {
+		if (unlisten) {
+			unlisten();
+		}
+	});
 
 	$: ourAlias = null;
 	$: ourGateway = null;
@@ -40,6 +49,7 @@
 
 <section>
 	<table border=1>
+		<tbody>
 		<tr>
 			<td>Our Alias</td>
 			<td>{ourAlias}</td>
@@ -48,10 +58,12 @@
 			<td>Our Gateway</td>
 			<td>{ourGateway}</td>
 		</tr>
+		</tbody>
 	</table>
 </section>
 <section>
 	<table border=1>
+		<tbody>
 		<tr>
 			<td>Player 1</td>
 			<td>{player1Alias}</td>
@@ -66,6 +78,7 @@
 			<td>Map</td>
 			<td>{map}</td>
 		</tr>
+	</tbody>
 	</table>
 </section>
 

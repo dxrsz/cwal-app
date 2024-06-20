@@ -6,7 +6,7 @@ use std::{
 };
 
 use chrome_cache_parser::{block_file::LazyBlockFileCacheEntry, CCPError, CCPResult, ChromeCache};
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, TimeDelta};
 use notify::{Config, Event, Watcher};
 
 use crate::scr_events::ScrNetworkRequest;
@@ -26,6 +26,8 @@ struct CacheEntry {
 pub struct StarCache {
     _watcher: notify::PollWatcher,
 }
+
+const DEBOUNCE_CACHE_READ_TIME: TimeDelta = chrono::Duration::milliseconds(50);
 
 /// Watches the StarCraft cache directory and invokes the provided event handler with the url
 /// accesed by the client, as indicated by the new cache entries.
@@ -50,9 +52,7 @@ impl StarCache {
                 .unwrap();
         }
 
-        StarCache {
-            _watcher: watcher,
-        }
+        StarCache { _watcher: watcher }
     }
 
     fn create_watcher(
@@ -84,8 +84,14 @@ impl StarCache {
                         let cache = ChromeCache::from_path((&cache_path).clone()).unwrap();
 
                         let entries = cache.entries();
+                        let first_attempt_read_time = chrono::Local::now();
                         match Self::collect_entries(entries) {
                             Ok(entries) => {
+                                let elapsed = chrono::Local::now() - first_attempt_read_time;
+                                let remaining = DEBOUNCE_CACHE_READ_TIME - elapsed;
+                                if remaining > chrono::Duration::zero() {
+                                    std::thread::sleep(remaining.to_std().unwrap());
+                                }
                                 let CacheEntries { entries, hash } = entries;
 
                                 if let Some(previous_hash) = previous_hash {
@@ -96,9 +102,7 @@ impl StarCache {
 
                                 previous_hash = Some(hash);
                             }
-                            Err(_) => {
-                                continue;
-                            }
+                            Err(_) => {}
                         }
                     };
 
@@ -140,7 +144,11 @@ impl StarCache {
         // todo: new result type
         let entries: Vec<CacheEntry> = entries?
             .map(|mut entry| {
-                let last_used: DateTime<Local> = entry.get_rankings_node()?.get()?.last_used.into_datetime_local()?;
+                let last_used: DateTime<Local> = entry
+                    .get_rankings_node()?
+                    .get()?
+                    .last_used
+                    .into_datetime_local()?;
                 let entry = entry.get()?;
 
                 Ok::<CacheEntry, CCPError>(CacheEntry {

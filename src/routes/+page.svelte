@@ -2,24 +2,28 @@
 	import { invoke } from '@tauri-apps/api/tauri';
 	import { listen } from '@tauri-apps/api/event';
 	import { onDestroy } from 'svelte';
+	import type { ScrEvent } from '$lib/tauri';
 	import { SCApi, BroodWarConnection } from 'bw-web-api';
 
 	let unlisten: () => void;
+	let port: number | null = $state(null);
+
+	type TauriEvent<T> = {
+		payload: T;
+	}
 
 	(async () => {
-		unlisten = await listen('scr-event', (event: any) => {
-			console.log('click event', event.payload);
-
-			if (event.payload.ProfileSelect) {
+		unlisten = await listen('scr-event', (event: TauriEvent<ScrEvent>) => {
+			if ('ProfileSelect' in event.payload) {
 				ourAlias = event.payload.ProfileSelect.alias;
 				ourGateway = event.payload.ProfileSelect.gateway;
-			} else if (event.payload.MatchFound) {
+			} else if ('MatchFound' in event.payload) {
 				player1Alias = event.payload.MatchFound.player1.alias;
 				player1Gateway = event.payload.MatchFound.player1.gateway;
 				player2Alias = event.payload.MatchFound.player2.alias;
 				player2Gateway = event.payload.MatchFound.player2.gateway;
 				map = event.payload.MatchFound.map;
-			} else if (event.payload.WebServerRunning) {
+			} else if ('WebServerRunning' in event.payload) {
 				port = event.payload.WebServerRunning.port;
 			}
 		});
@@ -31,36 +35,37 @@
 		}
 	});
 
-	let ourAlias = $state(null);
-	let ourGateway = $state(null);
+	const scapiFromPort: (port: number | null) => SCApi | null = (port: number | null) =>
+		port != null ? new SCApi(new BroodWarConnection(`http://localhost:${port}`)) : null;
 
-	let player1Alias = $state(null);
-	let player1Gateway = $state(null);
+	const playerSearch = async (searchValue: string) => {
+		if (!scapi || !searchValue || searchValue.length <= 3) {
+			return;
+		}
 
-	let player2Alias = $state(null);
-	let player2Gateway = $state(null);
+		try {
+			searchResults = await scapi.leaderboardNameSearch(12960, searchValue);
+		} catch (e) {
+			searchResults = [];
+			console.error(e);
+		}
+	};
+
+	let ourAlias: string | null = $state(null);
+	let ourGateway: number | null = $state(null);
+
+	let player1Alias: string | null = $state(null);
+	let player1Gateway: number | null = $state(null);
+
+	let player2Alias: string | null = $state(null);
+	let player2Gateway: number | null = $state(null);
 
 	let map = $state(null);
-	let port: number | null = $state(null);
 
-	let scapi = $derived(port && new SCApi(new BroodWarConnection(`http://localhost:${port}`)));
+	let scapi = $derived(scapiFromPort(port));
 
 	let searchValue = $state('');
-	let searchResults = $state([]);
-
-	$effect(async () => {
-		if (searchValue) {
-			try {
-				const result = await scapi?.leaderboardNameSearch(12960, searchValue);
-				searchResults = result;
-			} catch (e) {
-				console.error(e);
-				searchResults = [];
-			}
-		} else {
-			searchResults = [];
-		}
-	});
+	let searchResults: Awaited<ReturnType<SCApi['leaderboardNameSearch']>> = $state([]);
 
 	invoke('init_process');
 </script>
@@ -70,16 +75,14 @@
 	<meta name="description" content="Svelte demo app" />
 </svelte:head>
 
-
 <div class="dropdown">
-	<input type="text" class="grow" placeholder="Search" bind:value={searchValue} />
+	<input type="text" class="grow" placeholder="Search" bind:value={searchValue} oninput={() => playerSearch(searchValue)} />
 	<ul class="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-		{#each searchResults as result}
-			<li>{result.name}</li>
+		{#each searchResults as searchResult}
+			<li>{searchResult.name}</li>
 		{/each}
 	</ul>
 </div>
-
 
 <section>
 	<table border="1">

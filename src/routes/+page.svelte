@@ -8,9 +8,7 @@
 </svelte:head>
 
 <section class="p-2">
-  <div class="dropdown">
-    <PlayerSearch />
-  </div>
+  <div class="dropdown"></div>
 </section>
 
 <style>

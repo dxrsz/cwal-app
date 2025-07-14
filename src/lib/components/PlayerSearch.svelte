@@ -16,6 +16,8 @@
 
   const resetSearching = () => {
     searching = false;
+    searchResults = [];
+    searchValue = "";
   };
 
   onMount(resetSearching);
@@ -44,6 +46,7 @@
 
   const handlePlayerSelect = (name: string, gateway: string) => {
     goto(`/player/${name}/${encodeURIComponent(gateway)}`);
+    resetSearching();
   };
 
   $effect(() => {
@@ -57,7 +60,7 @@
 </svelte:head>
 
 <Command.Root
-  class="rounded-lg border shadow-md md:min-w-[450px]"
+  class="rounded-lg border shadow-md md:min-w-[450px] max-h-min"
   shouldFilter={!searching}
 >
   <Command.Input placeholder="Player Search" bind:value={searchValue} />

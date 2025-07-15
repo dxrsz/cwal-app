@@ -3,7 +3,6 @@
   import { ModeWatcher } from "mode-watcher";
   import * as Sidebar from "@/lib/components/ui/sidebar";
   import AppSidebar from "@/lib/components/app-sidebar.svelte";
-  import PlayerSearch from "@/lib/components/PlayerSearch.svelte";
 
   let { children } = $props();
 
@@ -17,10 +16,14 @@
 
 <ModeWatcher />
 
+<svelte:head>
+  <title>CWAL Desktop App</title>
+  <meta name="description" content="CWAL Desktop App" />
+</svelte:head>
+
 <Sidebar.Provider>
   <AppSidebar />
-  <main class="w-full p-2">
-    <PlayerSearch />
+  <main class="w-full">
     {@render children?.()}
   </main>
 </Sidebar.Provider>

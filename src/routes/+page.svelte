@@ -7,9 +7,7 @@
   <meta name="description" content="Svelte demo app" />
 </svelte:head>
 
-<section class="p-2">
-  <div class="dropdown"></div>
-</section>
+<PlayerSearch />
 
 <style>
 </style>

@@ -2,19 +2,11 @@
   import PlayerSearch from "@/lib/components/PlayerSearch.svelte";
   import * as Table from "@/lib/components/ui/table";
   import { getGb } from "@/lib/scApi.svelte";
-  import { debounce } from "@/lib/utils";
-  import { Effect } from "@tauri-apps/api/window";
+  import { avatarOrDefault, debounce } from "@/lib/utils";
   import type { Ranking } from "gravatic-booster";
   import { onMount, type SvelteComponent } from "svelte";
 
   const gb = getGb();
-
-  const avatarOrDefault = (avatar?: string) => {
-    return (
-      avatar ||
-      "https://scrassets.classic.blizzard.com/avatar-icons/S1/d2edd0800865e3a5e0c0c86898010f90.png"
-    );
-  };
 
   const LOAD_MORE_DELTA = 100;
 
@@ -70,7 +62,7 @@
 >
   <PlayerSearch />
   <Table.Root>
-    <Table.Caption>A list of your recent invoices.</Table.Caption>
+    <Table.Caption>StarCraft: Remastered Ladder</Table.Caption>
     <Table.Header>
       <Table.Row>
         <Table.Head class="w-[100px]">Rank</Table.Head>

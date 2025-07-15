@@ -1,8 +1,48 @@
 <script lang="ts">
+  import { getGb } from "@/lib/scApi.svelte";
   import type { PageProps } from "./$types";
+  import { onMount } from "svelte";
+  import type { GravaticBooster, Match, Ranking } from "gravatic-booster";
+  import * as Card from "@/lib/components/ui/card";
+  import { avatarOrDefault } from "@/lib/utils";
 
   const { data }: PageProps = $props();
   const { id, gateway } = data;
+
+  const gb = getGb();
+
+  let profile: Awaited<
+    ReturnType<
+      typeof GravaticBooster.prototype.minimalAccountWithGamesPlayedLastWeek
+    >
+  > | null = $state(null);
+  let ranking: Ranking | null = $state(null);
+  let avatar = $derived(avatarOrDefault(ranking?.avatar));
+  let matchesGenerator: AsyncGenerator<Match, void, void> | null = null;
+  let matches: Match[] = $state([]);
+
+  const loadMoreMatches = async () => {
+    if (!matchesGenerator) {
+      return;
+    }
+    const next = await matchesGenerator.next();
+    if (next.value) {
+      matches.push(next.value);
+    }
+  };
+
+  onMount(async () => {
+    const _gb = await gb;
+    profile = await _gb.minimalAccountWithGamesPlayedLastWeek(id, {
+      gateway: Number.parseInt(gateway),
+    });
+    const leaderboard = await _gb.leaderboard({
+      seasonId: profile.currentSeason,
+    });
+    ranking = (await profile.requestedProfile?.ranking(leaderboard.id)) ?? null;
+    matchesGenerator = (await profile.requestedProfile?.ladderGames()) ?? null;
+    await loadMoreMatches();
+  });
 </script>
 
 <svelte:head>
@@ -10,33 +50,25 @@
   <meta name="description" content="Player details page" />
 </svelte:head>
 
-<div class="container mx-auto p-6">
-  <div class="mb-6">
-    <a href="/" class="text-blue-500 hover:text-blue-700 underline">
-      ← Back to Search
-    </a>
+<div class="container p-2">
+  <div class="flex">
+    <img src={avatar} />
+    {id}
   </div>
-
-  <div class="bg-gray-800 rounded-lg border p-6">
-    <h1 class="text-2xl font-bold text-white mb-4">Player Details</h1>
-
-    <div class="space-y-3">
-      <div>
-        <span class="text-gray-400">Player Name:</span>
-        <span class="text-white ml-2 font-semibold">{id}</span>
-      </div>
-
-      <div>
-        <span class="text-gray-400">Player ID:</span>
-        <span class="text-white ml-2">{id}</span>
-      </div>
-    </div>
-
-    <div class="mt-6 p-4 bg-gray-700 rounded border-l-4 border-blue-500">
-      <p class="text-gray-300">
-        Player details and statistics will be implemented here.
-      </p>
-    </div>
+  <div>
+    {#each matches as match}
+      {match.timestamp}
+      {match.closedSlots}
+      {match.flags}
+      {match.gameSpeed}
+      {match.hostName}
+      {match.netTurnRate}
+      {match.map}
+      {match.id}
+      {match.name}
+      {match.players}
+      {match.gameId}
+    {/each}
   </div>
 </div>
 

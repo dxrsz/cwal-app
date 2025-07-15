@@ -18,6 +18,14 @@ const mapToObject = (map: Map<any, any>) => {
 	return result;
 }
 
+export const avatarOrDefault = (avatar?: string) => {
+	return (
+		avatar ||
+		"https://scrassets.classic.blizzard.com/avatar-icons/S1/d2edd0800865e3a5e0c0c86898010f90.png"
+	);
+};
+
+
 export function debounce<T extends (...args: any[]) => any>(
 	func: T,
 	delay: number

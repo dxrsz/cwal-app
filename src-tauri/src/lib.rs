@@ -5,14 +5,14 @@ mod scr_events;
 mod scr_process;
 
 use std::sync::{atomic::AtomicBool, Arc, Mutex};
+use std::fs;
+use std::path::Path;
 
 use scr_events::ScrProcessEventProvider;
 use tauri::Window;
 
-// Esnure that the background process is only initialized once.
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
-// Initialize the background processes that notify the frontend about SC:R events.
 #[tauri::command]
 fn init_process(window: Window) {
     if INITIALIZED.load(std::sync::atomic::Ordering::Relaxed) {
@@ -31,11 +31,43 @@ fn init_process(window: Window) {
     });
 }
 
+#[tauri::command]
+fn read_settings_file(path: String) -> Result<String, String> {
+    match fs::read_to_string(&path) {
+        Ok(content) => Ok(content),
+        Err(e) => {
+            if e.kind() == std::io::ErrorKind::NotFound {
+                Ok(String::new())
+            } else {
+                Err(format!("Failed to read settings file: {}", e))
+            }
+        }
+    }
+}
+
+#[tauri::command]
+fn write_settings_file(path: String, content: String) -> Result<(), String> {
+    if let Some(parent) = Path::new(&path).parent() {
+        if let Err(e) = fs::create_dir_all(parent) {
+            return Err(format!("Failed to create directory: {}", e));
+        }
+    }
+
+    match fs::write(&path, content) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(format!("Failed to write settings file: {}", e)),
+    }
+}
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
         .setup(|_app| Ok(()))
-        .invoke_handler(tauri::generate_handler![init_process])
+        .invoke_handler(tauri::generate_handler![
+            init_process,
+            read_settings_file,
+            write_settings_file
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

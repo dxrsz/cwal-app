@@ -73,31 +73,39 @@
   });
 </script>
 
-<div class="p-2">
-  <Select.Root type="single" name="season" bind:value={season}>
-    <Select.Trigger class="w-[180px]"
-      >{season != null ? `Season ${season}` : "Season"}</Select.Trigger
-    >
-    <Select.Content>
-      <Select.Group>
-        {#each seasons as season}
-          <Select.Item value={`${season}`} label={`Season ${season}`}>
-            {`Season ${season}`}
-          </Select.Item>
-        {/each}
-      </Select.Group>
-    </Select.Content>
-  </Select.Root>
+<div class="p-6 space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold">Maps</h1>
+      <p class="text-muted-foreground">StarCraft: Remastered Official Ladder Maps</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <label class="text-sm font-medium">Season:</label>
+      <Select.Root type="single" name="season" bind:value={season}>
+        <Select.Trigger class="w-[140px]">
+          {season != null ? `Season ${season}` : "Select Season"}
+        </Select.Trigger>
+        <Select.Content>
+          <Select.Group>
+            {#each seasons as season}
+              <Select.Item value={`${season}`} label={`Season ${season}`}>
+                {`Season ${season}`}
+              </Select.Item>
+            {/each}
+          </Select.Group>
+        </Select.Content>
+      </Select.Root>
+    </div>
+  </div>
 
   <Table.Root>
-    <Table.Caption>StarCraft: Remastered Official Ladder Maps</Table.Caption>
     <Table.Header>
       <Table.Row>
         <Table.Head class="w-[100px]">Name</Table.Head>
         <Table.Head>Version</Table.Head>
         <Table.Head>Size</Table.Head>
         <Table.Head>Last Modified</Table.Head>
-        <Table.Head class="text-right">Download Link</Table.Head>
+        <Table.Head class="text-right">Download</Table.Head>
       </Table.Row>
     </Table.Header>
     <Table.Body>

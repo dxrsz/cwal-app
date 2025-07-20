@@ -155,8 +155,7 @@
 
       // Create formatted filename with player info
       const timestamp = match.timestamp ?? replay.timestamp;
-      const formattedDate =
-        timestamp?.toISOString().slice(0, 10) || "unknown";
+      const formattedDate = timestamp?.toISOString().slice(0, 10) || "unknown";
       const p1Alias = match.thisPlayer?.toon || "Unknown";
       const p1Race = getRaceInitial(match.thisPlayer?.race);
       const p2Alias = match.opponent?.toon || "Unknown";

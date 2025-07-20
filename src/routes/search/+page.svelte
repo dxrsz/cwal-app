@@ -1,5 +1,10 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import PlayerSearch from "@/lib/components/PlayerSearch.svelte";
+
+  const handlePlayerSelect = (name: string, gateway: string) => {
+    goto(`/player/${gateway}/${encodeURIComponent(name)}`);
+  };
 </script>
 
 <svelte:head>
@@ -14,7 +19,7 @@
     </div>
 
     <div class="w-full">
-      <PlayerSearch />
+      <PlayerSearch onPlayerSelect={handlePlayerSelect} />
     </div>
   </div>
 </div>

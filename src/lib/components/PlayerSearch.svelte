@@ -12,6 +12,12 @@
   import { getGb } from "@/lib/scApi.svelte";
   import { avatarOrDefault, debounce } from "@/lib/utils";
 
+  interface Props {
+    onPlayerSelect?: (name: string, gateway: string) => void;
+  }
+
+  const { onPlayerSelect }: Props = $props();
+
   let searching: boolean = $state(false);
   let gb: Promise<GravaticBooster> = getGb();
   let inputHeight: number = $state(0);
@@ -65,7 +71,12 @@
   }, 250);
 
   const handlePlayerSelect = (name: string, gateway: string) => {
-    goto(`/player/${gateway}/${encodeURIComponent(name)}`);
+    if (onPlayerSelect) {
+      onPlayerSelect(name, gateway);
+    } else {
+      // Default behavior: navigate to player page
+      goto(`/player/${gateway}/${encodeURIComponent(name)}`);
+    }
     resetSearching();
   };
 

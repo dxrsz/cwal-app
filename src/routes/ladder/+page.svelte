@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
+  import { goto } from "$app/navigation";
   import type { Ranking } from "gravatic-booster";
 
   import PlayerSearch from "@/lib/components/PlayerSearch.svelte";
@@ -18,6 +19,10 @@
   let fetching = $state(false); // todo reflect state in ui
   let rankingsGenerator: AsyncGenerator<Ranking, void, unknown> | null = null;
   let scrollableDiv: HTMLDivElement;
+
+  const handlePlayerSelect = (name: string, gateway: string) => {
+    goto(`/player/${gateway}/${encodeURIComponent(name)}`);
+  };
 
   onMount(() => {
     // todo; a better method would be to detect if we don't have a scrollbar yet and keep fetching until that happens
@@ -64,7 +69,7 @@
   onscroll={onScroll}
   bind:this={scrollableDiv}
 >
-  <PlayerSearch />
+  <PlayerSearch onPlayerSelect={handlePlayerSelect} />
   <Table.Root>
     <Table.Caption>StarCraft: Remastered Ladder</Table.Caption>
     <Table.Header>

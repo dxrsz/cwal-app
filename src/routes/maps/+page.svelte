@@ -113,7 +113,7 @@
         <Table.Head>Version</Table.Head>
         <Table.Head>Size</Table.Head>
         <Table.Head>Last Modified</Table.Head>
-        <Table.Head class="text-right">Download</Table.Head>
+        <Table.Head><!--Download, redundant--></Table.Head>
       </Table.Row>
     </Table.Header>
     <Table.Body>

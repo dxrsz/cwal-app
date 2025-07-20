@@ -4,6 +4,7 @@
   import type { GravaticBooster, Match, Ranking } from "gravatic-booster";
   import { toast } from "svelte-sonner";
 
+  import CountryFlag from "@/lib/components/CountryFlag.svelte";
   import MapName from "@/lib/components/MapName.svelte";
   import Race from "@/lib/components/icons/race.svelte";
   import Rank from "@/lib/components/icons/rank.svelte";
@@ -96,118 +97,6 @@
   const getRaceInitial = (race: string | undefined): string => {
     if (!race || race.length === 0) return "U";
     return race[0].toUpperCase();
-  };
-
-  const getCountryFlag = (countryCode: string): string => {
-    const flagMap: Record<string, string> = {
-      USA: "🇺🇸",
-      CAN: "🇨🇦",
-      GBR: "🇬🇧",
-      DEU: "🇩🇪",
-      FRA: "🇫🇷",
-      JPN: "🇯🇵",
-      KOR: "🇰🇷",
-      CHN: "🇨🇳",
-      AUS: "🇦🇺",
-      BRA: "🇧🇷",
-      MEX: "🇲🇽",
-      RUS: "🇷🇺",
-      SWE: "🇸🇪",
-      NOR: "🇳🇴",
-      DNK: "🇩🇰",
-      FIN: "🇫🇮",
-      NLD: "🇳🇱",
-      ESP: "🇪🇸",
-      ITA: "🇮🇹",
-      POL: "🇵🇱",
-      BEL: "🇧🇪",
-      AUT: "🇦🇹",
-      CHE: "🇨🇭",
-      CZE: "🇨🇿",
-      HUN: "🇭🇺",
-      PRT: "🇵🇹",
-      GRC: "🇬🇷",
-      TUR: "🇹🇷",
-      ISR: "🇮🇱",
-      IND: "🇮🇳",
-      THA: "🇹🇭",
-      SGP: "🇸🇬",
-      MYS: "🇲🇾",
-      IDN: "🇮🇩",
-      PHL: "🇵🇭",
-      VNM: "🇻🇳",
-      TWN: "🇹🇼",
-      HKG: "🇭🇰",
-      NZL: "🇳🇿",
-      ZAF: "🇿🇦",
-      ROU: "🇷🇴",
-      BGR: "🇧🇬",
-      HRV: "🇭🇷",
-      SRB: "🇷🇸",
-      SVN: "🇸🇮",
-      SVK: "🇸🇰",
-      EST: "🇪🇪",
-      LVA: "🇱🇻",
-      LTU: "🇱🇹",
-      UKR: "🇺🇦",
-    };
-    return flagMap[countryCode.toUpperCase()] || "🌍";
-  };
-
-  const getCountryName = (countryCode: string): string => {
-    const countryNames: Record<string, string> = {
-      USA: "United States",
-      CAN: "Canada",
-      GBR: "United Kingdom",
-      DEU: "Germany",
-      FRA: "France",
-      JPN: "Japan",
-      KOR: "South Korea",
-      CHN: "China",
-      AUS: "Australia",
-      BRA: "Brazil",
-      MEX: "Mexico",
-      RUS: "Russia",
-      SWE: "Sweden",
-      NOR: "Norway",
-      DNK: "Denmark",
-      FIN: "Finland",
-      NLD: "Netherlands",
-      ESP: "Spain",
-      ITA: "Italy",
-      POL: "Poland",
-      BEL: "Belgium",
-      AUT: "Austria",
-      CHE: "Switzerland",
-      CZE: "Czech Republic",
-      HUN: "Hungary",
-      PRT: "Portugal",
-      GRC: "Greece",
-      TUR: "Turkey",
-      ISR: "Israel",
-      IND: "India",
-      THA: "Thailand",
-      SGP: "Singapore",
-      MYS: "Malaysia",
-      IDN: "Indonesia",
-      PHL: "Philippines",
-      VNM: "Vietnam",
-      TWN: "Taiwan",
-      HKG: "Hong Kong",
-      NZL: "New Zealand",
-      ZAF: "South Africa",
-      ROU: "Romania",
-      BGR: "Bulgaria",
-      HRV: "Croatia",
-      SRB: "Serbia",
-      SVN: "Slovenia",
-      SVK: "Slovakia",
-      EST: "Estonia",
-      LVA: "Latvia",
-      LTU: "Lithuania",
-      UKR: "Ukraine",
-    };
-    return countryNames[countryCode.toUpperCase()] || countryCode.toUpperCase();
   };
 
   const fetchUntilScrollbarOrEnd = async () => {
@@ -324,42 +213,36 @@
   >
     <div class="p-6 space-y-6">
       <!-- Player Header -->
-      <div class="bg-muted/20 rounded-lg p-4">
-        <div class="flex items-center gap-4">
-          <Avatar.Root class="w-14 h-14">
-            <Avatar.Image src={avatar} alt="Player Avatar" />
-            <Avatar.Fallback class="text-base font-bold"
-              >{id.slice(0, 2).toUpperCase()}</Avatar.Fallback
-            >
-          </Avatar.Root>
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-1">
-              <h1 class="text-2xl font-bold">{id}</h1>
-              {#if ranking?.featureRace}
-                <div class="px-2 py-1 bg-background rounded text-sm">
-                  <Race race={ranking.featureRace} />
-                </div>
-              {/if}
-              {#if profile?.countryCode}
-                <Tooltip.Root>
-                  <Tooltip.Trigger>
-                    <div
-                      class="flex items-center px-2 py-1 bg-background rounded text-sm gap-1 cursor-help"
-                    >
-                      <span class="text-lg flag-emoji"
-                        >{getCountryFlag(profile.countryCode)}</span
-                      >
-                    </div>
-                  </Tooltip.Trigger>
-                  <Tooltip.Content>
-                    <p>{getCountryName(profile.countryCode)}</p>
-                  </Tooltip.Content>
-                </Tooltip.Root>
-              {/if}
+      <div class="bg-muted/20 rounded-lg p-6">
+        <div class="flex items-start justify-between gap-6">
+          <!-- Left Side: Avatar and Name -->
+          <div class="flex items-start gap-6">
+            <Avatar.Root class="w-20 h-20 flex-shrink-0">
+              <Avatar.Image src={avatar} alt="Player Avatar" />
+              <Avatar.Fallback class="text-xl font-bold"
+                >{id.slice(0, 2).toUpperCase()}</Avatar.Fallback
+              >
+            </Avatar.Root>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-4 mb-3">
+                <h1 class="text-3xl font-bold text-foreground">{id}</h1>
+                {#if ranking?.featureRace}
+                  <div
+                    class="px-3 py-1.5 bg-background rounded-md text-sm font-medium shadow-sm"
+                  >
+                    <Race race={ranking.featureRace} />
+                  </div>
+                {/if}
+              </div>
             </div>
-            <p class="text-sm text-muted-foreground">
-              {ranking?.gateway?.name || `Gateway ${gateway}`}
-            </p>
+          </div>
+
+          <!-- Right Side: Country and Gateway -->
+          <div class="flex-shrink-0 space-y-3 text-right">
+            {#if profile?.countryCode}
+              <CountryFlag countryCode={profile.countryCode} />
+            {/if}
           </div>
         </div>
       </div>

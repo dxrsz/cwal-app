@@ -12,20 +12,20 @@
           text: "StarCraft Connected",
           subtext: `API Port: ${port}`,
           icon: Wifi,
-          bgColor: "bg-green-500",
-          textColor: "text-green-100",
-          iconColor: "text-green-200",
-          pulseColor: "bg-green-400",
+          bgColor: "bg-green-600",
+          textColor: "text-white",
+          iconColor: "text-green-100",
+          pulseColor: "bg-green-500",
         };
       case GameServerState.NotRunning:
         return {
           text: "StarCraft Offline",
           subtext: "Launch StarCraft...",
           icon: WifiOff,
-          bgColor: "bg-red-500",
-          textColor: "text-red-100",
-          iconColor: "text-red-200",
-          pulseColor: "bg-red-400",
+          bgColor: "bg-red-600",
+          textColor: "text-white",
+          iconColor: "text-red-100",
+          pulseColor: "bg-red-500",
         };
       case GameServerState.Indeterminate:
       default:
@@ -33,10 +33,10 @@
           text: "Checking Status",
           subtext: "Detecting game...",
           icon: Circle,
-          bgColor: "bg-yellow-500",
-          textColor: "text-yellow-100",
-          iconColor: "text-yellow-200",
-          pulseColor: "bg-yellow-400",
+          bgColor: "bg-yellow-600",
+          textColor: "text-white",
+          iconColor: "text-yellow-100",
+          pulseColor: "bg-yellow-500",
         };
     }
   };

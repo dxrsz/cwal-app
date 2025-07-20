@@ -10,7 +10,7 @@
   import { Skeleton } from "@/lib/components/ui/skeleton";
   import * as Table from "@/lib/components/ui/table";
   import * as Tooltip from "@/lib/components/ui/tooltip";
-  import { getGb } from "@/lib/scApi.svelte";
+  import { getGb, sleep } from "@/lib/scApi.svelte";
   import { avatarOrDefault } from "@/lib/utils";
 
   import type { PageProps } from "./$types";
@@ -92,7 +92,7 @@
       }
 
       // Give DOM time to update
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await sleep(100);
 
       if (hasScrollbar()) {
         // We now have enough content to scroll

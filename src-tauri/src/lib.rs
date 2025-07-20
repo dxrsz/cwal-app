@@ -59,6 +59,39 @@ fn write_settings_file(path: String, content: String) -> Result<(), String> {
     }
 }
 
+#[tauri::command]
+async fn download_file(url: String, destination_path: String, filename: String) -> Result<String, String> {
+    use std::io::Write;
+    use tauri_plugin_http::reqwest;
+    
+    let full_path = Path::new(&destination_path).join(&filename);
+    
+    if let Some(parent) = full_path.parent() {
+        if let Err(e) = fs::create_dir_all(parent) {
+            return Err(format!("Failed to create directory: {}", e));
+        }
+    }
+
+    let client = reqwest::Client::new();
+    let response = client.get(&url).send().await
+        .map_err(|e| format!("Failed to download file: {}", e))?;
+
+    if !response.status().is_success() {
+        return Err(format!("Download failed with status: {}", response.status()));
+    }
+
+    let bytes = response.bytes().await
+        .map_err(|e| format!("Failed to read response: {}", e))?;
+
+    let mut file = fs::File::create(&full_path)
+        .map_err(|e| format!("Failed to create file: {}", e))?;
+
+    file.write_all(&bytes)
+        .map_err(|e| format!("Failed to write file: {}", e))?;
+
+    Ok(full_path.to_string_lossy().to_string())
+}
+
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
@@ -66,7 +99,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             init_process,
             read_settings_file,
-            write_settings_file
+            write_settings_file,
+            download_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

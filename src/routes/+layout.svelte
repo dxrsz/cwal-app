@@ -1,5 +1,6 @@
 <script lang="ts">
   import { ModeWatcher } from "mode-watcher";
+  import { Toaster } from "svelte-sonner";
 
   import TitleBar from "@/lib/components/TitleBar.svelte";
   import AppSidebar from "@/lib/components/app-sidebar.svelte";
@@ -34,3 +35,5 @@
     </Sidebar.Provider>
   </div>
 </div>
+
+<Toaster />

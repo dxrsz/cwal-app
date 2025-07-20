@@ -80,9 +80,8 @@
       <p class="text-muted-foreground">StarCraft: Remastered Official Ladder Maps</p>
     </div>
     <div class="flex items-center gap-2">
-      <label class="text-sm font-medium">Season:</label>
       <Select.Root type="single" name="season" bind:value={season}>
-        <Select.Trigger class="w-[140px]">
+        <Select.Trigger class="w-[140px]" aria-label="Select Season">
           {season != null ? `Season ${season}` : "Select Season"}
         </Select.Trigger>
         <Select.Content>

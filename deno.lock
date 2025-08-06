@@ -9,6 +9,7 @@
     "npm:@tailwindcss/vite@^4.1.11": "4.1.11_vite@6.3.5__picomatch@4.0.2",
     "npm:@tauri-apps/api@2": "2.6.0",
     "npm:@tauri-apps/cli@2": "2.6.2",
+    "npm:@tauri-apps/plugin-dialog@^2.3.2": "2.3.2",
     "npm:@tauri-apps/plugin-http@2.5": "2.5.0",
     "npm:@tauri-apps/plugin-opener@2": "2.4.0",
     "npm:@trivago/prettier-plugin-sort-imports@^5.2.2": "5.2.2_prettier@3.6.2_prettier-plugin-svelte@3.4.0__prettier@3.6.2__svelte@5.35.2___acorn@8.15.0_svelte@5.35.2__acorn@8.15.0",
@@ -654,6 +655,12 @@
       ],
       "bin": true
     },
+    "@tauri-apps/plugin-dialog@2.3.2": {
+      "integrity": "sha512-cNLo9YeQSC0MF4IgXnotHsqEgJk72MBZLXmQPrLA95qTaaWiiaFQ38hIMdZ6YbGUNkr3oni3EhU+AD5jLHcdUA==",
+      "dependencies": [
+        "@tauri-apps/api"
+      ]
+    },
     "@tauri-apps/plugin-http@2.5.0": {
       "integrity": "sha512-l4M2DUIsOBIMrbj4dJZwrB4mJiB7OA/2Tj3gEbX2fjq5MOpETklJPKfDvzUTDwuq4lIKCKKykz8E8tpOgvi0EQ==",
       "dependencies": [
@@ -1251,6 +1258,7 @@
         "npm:@tailwindcss/vite@^4.1.11",
         "npm:@tauri-apps/api@2",
         "npm:@tauri-apps/cli@2",
+        "npm:@tauri-apps/plugin-dialog@^2.3.2",
         "npm:@tauri-apps/plugin-http@2.5",
         "npm:@tauri-apps/plugin-opener@2",
         "npm:@trivago/prettier-plugin-sort-imports@^5.2.2",

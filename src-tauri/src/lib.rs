@@ -95,6 +95,7 @@ async fn download_file(url: String, destination_path: String, filename: String) 
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|_app| Ok(()))
         .invoke_handler(tauri::generate_handler![
             init_process,

@@ -5,7 +5,7 @@
 
   const { race }: Props = $props();
 
-  const value = race[0].toUpperCase();
+  const value = $derived(race[0].toUpperCase());
 </script>
 
 {#if value === "T"}

@@ -409,9 +409,9 @@
                 {/if}
               </div>
               {#if ranking.rating}
-                <p class="text-xs text-muted-foreground">
+                <span class="text-xs text-muted-foreground">
                   ${ranking.rating} MMR
-                </p>
+                </span>
               {/if}
             </div>
 
@@ -526,19 +526,17 @@
                         <MapName name={match.map.displayName} />
                       </Table.Cell>
                       <Table.Cell>
-                        <div class="flex items-center gap-1 text-sm">
-                          {#if match.thisPlayer?.race}
-                            <Race race={match.thisPlayer.race} />
-                          {:else}
-                            <span class="text-muted-foreground">?</span>
-                          {/if}
-                          <span class="text-muted-foreground">vs</span>
-                          {#if match.opponent?.race}
-                            <Race race={match.opponent.race} />
-                          {:else}
-                            <span class="text-muted-foreground">?</span>
-                          {/if}
-                        </div>
+                        {#if match.thisPlayer?.race}
+                          <Race race={match.thisPlayer.race} />
+                        {:else}
+                          <span class="text-muted-foreground">?</span>
+                        {/if}
+                        <span class="text-muted-foreground">vs</span>
+                        {#if match.opponent?.race}
+                          <Race race={match.opponent.race} />
+                        {:else}
+                          <span class="text-muted-foreground">?</span>
+                        {/if}
                       </Table.Cell>
                       <Table.Cell>
                         {#if match.opponent?.profileInfo?.gatewayId && match.opponent?.toon}
@@ -568,7 +566,7 @@
                           Unknown
                         {/if}
                       </Table.Cell>
-                      <Table.Cell class="text-center">
+                      <Table.Cell>
                         {@const matchResult = getMatchResult(match.thisPlayer)}
                         <span
                           class="px-2 py-1 rounded-full text-xs font-medium {matchResult ===
@@ -581,7 +579,7 @@
                           {getResultDisplay(matchResult)}
                         </span>
                       </Table.Cell>
-                      <Table.Cell class="text-center">
+                      <Table.Cell>
                         {#if match.name && replayDataCache.has(match.name)}
                           {@const replayData = replayDataCache.get(match.name)}
                           {#if replayData}
@@ -597,7 +595,7 @@
                           <span class="text-muted-foreground text-sm">—</span>
                         {/if}
                       </Table.Cell>
-                      <Table.Cell class="text-right">
+                      <Table.Cell>
                         {#if match.thisPlayer?.profileInfo?.points?.delta !== undefined}
                           <span
                             class="text-sm font-medium {match.thisPlayer

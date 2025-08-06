@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { RotateCcw } from "@lucide/svelte";
+  import { RotateCcw, FolderOpen } from "@lucide/svelte";
+  import { open } from "@tauri-apps/plugin-dialog";
 
   import { Button } from "@/lib/components/ui/button";
   import {
@@ -100,6 +101,36 @@
       mapPath = resolvedDefaults.mapDownloadPath;
     }
   };
+
+  const selectReplayFolder = async () => {
+    try {
+      const selected = await open({
+        directory: true,
+        defaultPath: replayPath || undefined,
+      });
+      
+      if (selected && typeof selected === 'string') {
+        replayPath = selected;
+      }
+    } catch (error) {
+      console.error('Failed to open folder picker:', error);
+    }
+  };
+
+  const selectMapFolder = async () => {
+    try {
+      const selected = await open({
+        directory: true,
+        defaultPath: mapPath || undefined,
+      });
+      
+      if (selected && typeof selected === 'string') {
+        mapPath = selected;
+      }
+    } catch (error) {
+      console.error('Failed to open folder picker:', error);
+    }
+  };
 </script>
 
 <div class="p-6 space-y-6">
@@ -137,11 +168,23 @@
             </Button>
           </div>
         </div>
-        <Input
-          id="replay-path"
-          bind:value={replayPath}
-          placeholder="C:\Users\YourName\Documents\StarCraft\Maps\Replays\CWAL"
-        />
+        <div class="flex gap-2">
+          <Input
+            id="replay-path"
+            bind:value={replayPath}
+            placeholder="C:\Users\YourName\Documents\StarCraft\Maps\Replays\CWAL"
+            class="flex-1"
+          />
+          <Button
+            onclick={selectReplayFolder}
+            variant="outline"
+            size="sm"
+            class="px-3"
+            title="Browse for folder"
+          >
+            <FolderOpen class="size-4" />
+          </Button>
+        </div>
         <p class="text-xs text-muted-foreground">
           {#if resolvedDefaults}
             Default: {resolvedDefaults.replayDownloadPath}
@@ -170,11 +213,23 @@
             </Button>
           </div>
         </div>
-        <Input
-          id="map-path"
-          bind:value={mapPath}
-          placeholder="C:\Users\YourName\Documents\StarCraft\Maps\CWAL"
-        />
+        <div class="flex gap-2">
+          <Input
+            id="map-path"
+            bind:value={mapPath}
+            placeholder="C:\Users\YourName\Documents\StarCraft\Maps\CWAL"
+            class="flex-1"
+          />
+          <Button
+            onclick={selectMapFolder}
+            variant="outline"
+            size="sm"
+            class="px-3"
+            title="Browse for folder"
+          >
+            <FolderOpen class="size-4" />
+          </Button>
+        </div>
         <p class="text-xs text-muted-foreground">
           {#if resolvedDefaults}
             Default: {resolvedDefaults.mapDownloadPath}

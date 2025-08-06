@@ -200,9 +200,9 @@
       <div class="bg-muted/20 rounded-lg p-6">
         <div class="flex items-start justify-between gap-6">
           <div class="flex items-start gap-6">
-            <Avatar.Root class="w-20 h-20 flex-shrink-0">
-              <Avatar.Image src={avatar} alt="Player Avatar" />
-              <Avatar.Fallback class="text-xl font-bold"
+            <Avatar.Root class="w-20 h-20 flex-shrink-0 rounded-md">
+              <Avatar.Image src={avatar} alt="Player Avatar" class="rounded-md" />
+              <Avatar.Fallback class="text-xl font-bold rounded-md"
                 >{id.slice(0, 2).toUpperCase()}</Avatar.Fallback
               >
             </Avatar.Root>

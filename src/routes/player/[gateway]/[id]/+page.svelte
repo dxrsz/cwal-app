@@ -1,11 +1,7 @@
 <script lang="ts">
   import { afterNavigate, goto } from "$app/navigation";
   import { page } from "$app/stores";
-  import type {
-    GravaticBooster,
-    Match,
-    Ranking,
-  } from "gravatic-booster";
+  import type { GravaticBooster, Match, Ranking } from "gravatic-booster";
 
   import CountryFlag from "@/lib/components/CountryFlag.svelte";
   import MatchesTable from "@/lib/components/MatchesTable.svelte";
@@ -17,7 +13,6 @@
   import { avatarOrDefault } from "@/lib/utils";
 
   import type { PageProps } from "./$types";
-
 
   const { data }: PageProps = $props();
 
@@ -79,7 +74,6 @@
     return scrollableDiv.scrollHeight > scrollableDiv.clientHeight;
   };
 
-
   const fetchUntilScrollbarOrEnd = async () => {
     let shouldContinue = true;
     while (shouldContinue) {
@@ -118,7 +112,6 @@
     }
   };
 
-
   afterNavigate(async () => {
     matches = [];
 
@@ -150,7 +143,6 @@
       goto(`/error?from=${encodeURIComponent($page.url.pathname)}`);
     }
   });
-
 </script>
 
 <svelte:head>
@@ -186,6 +178,11 @@
                   </div>
                 {/if}
               </div>
+              {#if profile?.battleTag}
+                <div class="text-sm text-muted-foreground mb-2">
+                  <span class="font-mono">{profile.battleTag}</span>
+                </div>
+              {/if}
             </div>
           </div>
 
@@ -261,4 +258,3 @@
     </div>
   </div>
 {/key}
-

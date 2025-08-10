@@ -1,13 +1,12 @@
 <script lang="ts">
   type Props = {
     name: string;
-    class?: string;
   };
 
-  const { name, class: className = "" }: Props = $props();
+  const { name }: Props = $props();
 
   const SC_FORMAT_CODES = {
-    MIMICK: 0x01,
+    MIMIC: 0x01,
     CYAN: 0x02,
     GREEN: 0x03,
     LIGHT_GREEN: 0x04,
@@ -19,6 +18,7 @@
     NEWLINE: 0x0a,
     INVISIBLE: 0x0b,
     REMOVE_BEYOND: 0x0c,
+    // 0x0d undefined?
     BLACK_0E: 0x0e,
     BLACK_0F: 0x0f,
     BLACK_10: 0x10,
@@ -34,11 +34,6 @@
     BLACK_CYAN: 0x1a,
     BLACK_1B: 0x1b,
     BLACK_1C: 0x1c,
-  } as const;
-
-  const FORMAT_CODE_RANGE = {
-    MIN: 0x01,
-    MAX: 0x1f,
   } as const;
 
   const CSS_COLORS = {
@@ -57,7 +52,7 @@
   } as const;
 
   const colorMap: Record<number, string> = {
-    [SC_FORMAT_CODES.MIMICK]: CSS_COLORS.CYAN,
+    [SC_FORMAT_CODES.MIMIC]: CSS_COLORS.CYAN,
     [SC_FORMAT_CODES.CYAN]: CSS_COLORS.CYAN,
     [SC_FORMAT_CODES.GREEN]: CSS_COLORS.GREEN,
     [SC_FORMAT_CODES.LIGHT_GREEN]: CSS_COLORS.LIGHT_GREEN,
@@ -86,19 +81,12 @@
 
     for (const char of rawName) {
       const charCode = char.charCodeAt(0);
+      let newColor;
 
-      if (
-        charCode >= FORMAT_CODE_RANGE.MIN &&
-        charCode <= FORMAT_CODE_RANGE.MAX
-      ) {
-        if (currentText) {
-          segments.push({ text: currentText, color: currentColor });
-          currentText = "";
-        }
-
-        if (colorMap[charCode]) {
-          currentColor = colorMap[charCode];
-        }
+      if ((newColor = colorMap[charCode])) {
+        segments.push({ text: currentText, color: currentColor });
+        currentColor = newColor;
+        currentText = "";
       } else {
         currentText += char;
       }
@@ -114,7 +102,7 @@
   const segments = $derived(parseMapName(name));
 </script>
 
-<span class={className}>
+<span>
   {#each segments as segment}
     {#if segment.text === SPECIAL_CHARS.NEWLINE}
       <br />

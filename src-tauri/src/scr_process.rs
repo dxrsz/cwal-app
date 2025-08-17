@@ -1,7 +1,6 @@
 use netstat::TcpState;
 use sysinfo::{Pid, System};
 
-// unfortunately doesn't implement eq, so we'll just compare the strings
 fn tcp_state_eq(state: &TcpState, other: &TcpState) -> bool {
     state.to_string() == other.to_string()
 }

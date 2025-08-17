@@ -28,4 +28,6 @@ sysinfo = "0.36.0"
 tauri-plugin-http = "2"
 nom = "8.0.0"
 flate2 = "1.1.2"
+anyhow = "1"
+lru = "0.16.0"
 

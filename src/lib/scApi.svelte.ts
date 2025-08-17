@@ -4,6 +4,7 @@ import { GravaticBooster, SCApiWithCaching } from 'gravatic-booster';
 import {
     fetch as tauriFetch
 } from '@tauri-apps/plugin-http';
+import { LRUCache } from 'lru-cache';
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -11,6 +12,17 @@ export class TauriConnection implements IBroodWarConnection {
     constructor(private server: string) { }
 
     async fetch(path: BroodWarApiPath): Promise<string> {
+        // LRU cache for stable endpoints; skip volatile ones below
+        const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+        const shouldCache = !NO_CACHE_PREFIXES.some((p) => normalizedPath.startsWith(p));
+        const key = `${this.server}${normalizedPath}`;
+        if (shouldCache) {
+            const cached = fetchCache.get(key);
+            if (cached) {
+                return cached;
+            }
+        }
+
         const max_attempts = 10;
         let timeout = 1000;
         let response: Response | null = null;
@@ -18,8 +30,7 @@ export class TauriConnection implements IBroodWarConnection {
         for (let i = 0; i < max_attempts; i++) {
             await sleep(timeout * i);
             try {
-                console.log(`Request: ${this.server}/${path}`);
-                response = await tauriFetch(`${this.server}/${path}`, {
+                response = await tauriFetch(key, {
                     headers: {
                         Accept: "application/json",
                     },
@@ -27,7 +38,6 @@ export class TauriConnection implements IBroodWarConnection {
                 });
             } catch (error) {
                 if (error instanceof DOMException && error.name === "TimeoutError") {
-                    console.log("timeout error, retrying");
                     continue; // these are retriable
                 }
                 throw error;
@@ -40,10 +50,12 @@ export class TauriConnection implements IBroodWarConnection {
                 textLower.startsWith("internal error") ||
                 textLower.startsWith("internal server error")
             ) {
-                console.log("server error, retrying");
+                console.error("server error, retrying");
                 continue; // these are retriable
             }
 
+            // On success, cache if allowed (no TTL; evicts by LRU max)
+            if (shouldCache) fetchCache.set(key, text);
             return text;
         }
 
@@ -54,6 +66,17 @@ export class TauriConnection implements IBroodWarConnection {
         }
     }
 }
+
+// Paths to avoid caching due to volatility
+const NO_CACHE_PREFIXES = [
+    '/web-api/v2/aurora-profile-by-toon',
+    '/web-api/v1/leaderboard',
+    '/web-api/v1/matchmaker-gameinfo-by-toon',
+    '/web-api/v1/matchmaker-player-stat-by-toon',
+];
+
+// Module-level LRU cache with no TTL; items evicted by LRU when max is reached
+const fetchCache = new LRUCache<string, string>({ max: 200 });
 
 const createGB = async (port: number): Promise<GravaticBooster> =>
     await GravaticBooster.create(

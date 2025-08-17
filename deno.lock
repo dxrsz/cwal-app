@@ -17,6 +17,7 @@
     "npm:bw-web-api@^3.0.2": "3.0.2",
     "npm:clsx@^2.1.1": "2.1.1",
     "npm:gravatic-booster@^3.1.0": "3.1.0",
+    "npm:lru-cache@^11.1.0": "11.1.0",
     "npm:mode-watcher@^1.1.0": "1.1.0_svelte@5.35.2__acorn@8.15.0",
     "npm:prettier-plugin-svelte@^3.4.0": "3.4.0_prettier@3.6.2_svelte@5.35.2__acorn@8.15.0",
     "npm:prettier@^3.6.2": "3.6.2",
@@ -837,7 +838,7 @@
       "integrity": "sha512-YtlYGlg5R0YqzFfwYWieR2ok7FOm3r1RUKNx0lvOLFWadFDT/WyN8uUes2jvgCb0QN1vMPCSGFfvzVlb2iYNGA==",
       "dependencies": [
         "bw-web-api",
-        "lru-cache",
+        "lru-cache@8.0.5",
         "tslog",
         "typescript-retry-decorator"
       ]
@@ -941,6 +942,9 @@
     },
     "lodash@4.17.21": {
       "integrity": "sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg=="
+    },
+    "lru-cache@11.1.0": {
+      "integrity": "sha512-QIXZUBJUx+2zHUdQujWejBkcD9+cs94tLn0+YL8UrCh+D5sCXZ4c7LaEH48pNwRY3MLDgqUFyhlCyjJPf1WP0A=="
     },
     "lru-cache@8.0.5": {
       "integrity": "sha512-MhWWlVnuab1RG5/zMRRcVGXZLCXrZTgfwMikgzCegsPnG62yDQo5JnqKkrK4jO5iKqDAZGItAqN5CtKBCBWRUA=="
@@ -1266,6 +1270,7 @@
         "npm:bw-web-api@^3.0.2",
         "npm:clsx@^2.1.1",
         "npm:gravatic-booster@^3.1.0",
+        "npm:lru-cache@^11.1.0",
         "npm:mode-watcher@^1.1.0",
         "npm:prettier-plugin-svelte@^3.4.0",
         "npm:prettier@^3.6.2",

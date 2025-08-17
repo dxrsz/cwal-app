@@ -10,4 +10,11 @@
   <body data-sveltekit-preload-data="hover">
     <div style="display: contents">%sveltekit.body%</div>
   </body>
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+      });
+    });
+  </script>
 </html>

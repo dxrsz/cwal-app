@@ -53,13 +53,9 @@
   });
 
   const updateHideShortMatches = debounce(async (hide: boolean) => {
-    try {
-      const store = await settingsStorePromise;
-      if (hide !== hideShortMatches) {
-        store.updateHideShortReplays(hide);
-      }
-    } catch (e) {
-      console.error("Failed to update hideShortReplays setting", e);
+    const settingsStore = await settingsStorePromise;
+    if (hide !== settingsStore.settings.hideShortReplays) {
+      settingsStore.updateHideShortReplays(hide);
     }
   }, 500);
 

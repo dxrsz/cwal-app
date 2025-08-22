@@ -96,10 +96,10 @@ export class SettingsStore {
         try {
             this._settings.hideShortReplays = hideShortReplays;
             await this.saveSettings();
-            toast.success('Replay preferences updated');
+            toast.success('Profile viewing preferences updated');
         } catch (error) {
-            console.error('Failed to update replay preferences:', error);
-            toast.error('Failed to update replay preferences');
+            console.error('Failed to update profile viewing preferences:', error);
+            toast.error('Failed to update profile viewing preferences');
         }
     }
 

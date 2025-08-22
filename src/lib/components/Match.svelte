@@ -40,11 +40,6 @@
 
   let internalReplayData = $state<ReplayDataMinimal | undefined>(replayData);
   let loading = $state(false);
-  let error: string | null = $state(null);
-  let replayKey = $derived.by(
-    () =>
-      `${match.id || match.timestamp?.getTime() || "r"}-${match.name || ""}`,
-  );
   const settingsStore = getSettingsStore();
   let isDownloading = $state(false);
 

@@ -243,7 +243,7 @@
               </div>
               {#if ranking.rating}
                 <span class="text-xs text-muted-foreground">
-                  ${ranking.rating} MMR
+                  {ranking.rating} MMR
                 </span>
               {/if}
             </div>

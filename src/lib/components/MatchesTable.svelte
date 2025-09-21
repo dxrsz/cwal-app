@@ -40,7 +40,13 @@
     onFetcherReady?: (fetcher: () => Promise<boolean>) => void;
   }
 
-  let { matches = [], profile = null, loading = false, hideShortMatches = false, onFetcherReady }: Props = $props();
+  let {
+    matches = [],
+    profile = null,
+    loading = false,
+    hideShortMatches = false,
+    onFetcherReady,
+  }: Props = $props();
 
   // Internal reactive matches state
   let internalMatches: Match[] = $state([...matches]);
@@ -53,7 +59,8 @@
   const ensureGenerator = async () => {
     if (matchesGenerator || !profile?.requestedProfile) return;
     try {
-      matchesGenerator = (await profile.requestedProfile?.ladderGames()) ?? null;
+      matchesGenerator =
+        (await profile.requestedProfile?.ladderGames()) ?? null;
     } catch (e) {
       console.error("Failed to create matches generator", e);
     }
@@ -125,10 +132,6 @@
     selectedChatMessages = chatMessages;
     showChatDialog = true;
   };
-
-  // Downloading logic moved into MatchRow for decoupling
-
-  // No effect needed; MatchRow handles fetching on mount
 </script>
 
 <Card.Root>
@@ -155,12 +158,16 @@
         <Table.Body>
           {#if filteredMatches.length > 0}
             {#each filteredMatches as match}
-              <MatchRow
-                {match}
-                replayData={replayDataCache.get(match.name || match.id) || undefined}
-                onOpenChat={(msgs) => showChatMessages(msgs)}
-                onSetReplayData={(data) => setReplayData(match.name || match.id, data)}
-              />
+              {#key match.id}
+                <MatchRow
+                  {match}
+                  replayData={replayDataCache.get(match.name || match.id) ||
+                    undefined}
+                  onOpenChat={(msgs) => showChatMessages(msgs)}
+                  onSetReplayData={(data) =>
+                    setReplayData(match.name || match.id, data)}
+                />
+              {/key}
             {/each}
           {:else if !loading && !internalLoading}
             <Table.Row>

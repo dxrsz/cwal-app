@@ -174,7 +174,11 @@
           filename,
         },
       );
-      dateDebug("parsed replay", { duration_ms: parsed.duration_ms, start_time_ms: parsed.start_time_ms, filename });
+      dateDebug("parsed replay", {
+        duration_ms: parsed.duration_ms,
+        start_time_ms: parsed.start_time_ms,
+        filename,
+      });
       const mapped: ReplayDataMinimal = {
         parsed_data: {
           game_duration_ms: parsed.duration_ms,
@@ -213,10 +217,16 @@
     if (internalReplayData?.timestamp) {
       const d = new Date(internalReplayData.timestamp);
       if (!isNaN(d.getTime())) {
-        dateDebug("using parsed replay timestamp", internalReplayData.timestamp);
+        dateDebug(
+          "using parsed replay timestamp",
+          internalReplayData.timestamp,
+        );
         return d;
       }
-      dateDebug("parsed replay timestamp invalid", internalReplayData.timestamp);
+      dateDebug(
+        "parsed replay timestamp invalid",
+        internalReplayData.timestamp,
+      );
     }
     if (match.timestamp instanceof Date) {
       if (!isNaN(match.timestamp.getTime())) {
@@ -227,14 +237,21 @@
     } else if (match.timestamp && typeof match.timestamp === "string") {
       const d = new Date(match.timestamp);
       if (!isNaN(d.getTime())) {
-        dateDebug("using match string timestamp", match.timestamp, d.toISOString());
+        dateDebug(
+          "using match string timestamp",
+          match.timestamp,
+          d.toISOString(),
+        );
         return d;
       }
       dateDebug("match string timestamp invalid", match.timestamp);
     }
     if (fallbackReplayDate) {
       if (!isNaN(fallbackReplayDate.getTime())) {
-        dateDebug("using fallback replay timestamp", fallbackReplayDate.toISOString());
+        dateDebug(
+          "using fallback replay timestamp",
+          fallbackReplayDate.toISOString(),
+        );
         return fallbackReplayDate;
       }
       dateDebug("fallback replay timestamp invalid", fallbackReplayDate);
@@ -260,10 +277,16 @@
       const replays = await match.replays;
       const replay = replays.anyReplay;
       if (replay?.timestamp) {
-        const d = replay.timestamp instanceof Date ? replay.timestamp : new Date(replay.timestamp as any);
+        const d =
+          replay.timestamp instanceof Date
+            ? replay.timestamp
+            : new Date(replay.timestamp as any);
         if (!isNaN(d.getTime())) {
           fallbackReplayDate = d;
-          dateDebug("captured immediate fallback replay timestamp", d.toISOString());
+          dateDebug(
+            "captured immediate fallback replay timestamp",
+            d.toISOString(),
+          );
         } else {
           dateDebug("immediate replay timestamp invalid", replay.timestamp);
         }
@@ -389,7 +412,7 @@
         }}
         size="sm"
         variant="outline"
-        class="h-7 px-2 text-xs"
+        class="h-7 my-1 text-xs cursor-pointer"
         >Chat ({internalReplayData.parsed_data.chat_messages.length})</Button
       >
     {:else if internalReplayData}
@@ -406,7 +429,7 @@
       disabled={isDownloading}
       size="sm"
       variant="outline"
-      class="cursor-pointer"
+      class="h-7 my-1 text-xs cursor-pointer"
       >{isDownloading ? "Downloading..." : "Download"}</Button
     >
   </td>

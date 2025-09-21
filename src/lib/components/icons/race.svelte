@@ -5,7 +5,7 @@
 
   const { race }: Props = $props();
 
-  const value = race.toUpperCase().at(0) || "U";
+  const value = $state(race.toUpperCase().at(0) || "U");
 </script>
 
 {#if value === "T"}

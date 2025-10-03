@@ -4,6 +4,7 @@
   import SettingsIcon from "@lucide/svelte/icons/settings";
   import LadderIcon from "@lucide/svelte/icons/waves-ladder";
 
+  import RequestsStatus from "@/lib/components/RequestsStatus.svelte";
   import StarCraftStatus from "@/lib/components/StarCraftStatus.svelte";
   import * as Sidebar from "@/lib/components/ui/sidebar";
   import { getLimitsStore } from "@/lib/limits.svelte";
@@ -60,11 +61,11 @@
   </Sidebar.Content>
 
   <Sidebar.Footer>
-    <div class="text-xs text-muted-foreground mb-2">
-      API Requests: {numApiRequests}
-      <br />
-      Replay Downloads: {numReplayDownloads}
-      <StarCraftStatus />
-    </div></Sidebar.Footer
-  >
+    <RequestsStatus
+      apiRequests={numApiRequests}
+      replaysDownloaded={numReplayDownloads}
+      label="Usage"
+    />
+    <StarCraftStatus />
+  </Sidebar.Footer>
 </Sidebar.Root>

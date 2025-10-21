@@ -6,6 +6,8 @@ export interface AppSettings {
     replayDownloadPath: string;
     mapDownloadPath: string;
     hideShortReplays: boolean;
+    maxApiRequestsTps: number;
+    maxReplayDownloadsTps: number;
 }
 
 export class SettingsStore {
@@ -53,21 +55,19 @@ export class SettingsStore {
     }
 
     static getDefaultSettings = async (): Promise<AppSettings> => {
+        let home: string = "C:\\Users\\Documents";
         try {
-            const home = await homeDir();
-            return {
-                replayDownloadPath: `${home}\\Documents\\StarCraft\\Maps\\Replays\\CWAL`,
-                mapDownloadPath: `${home}\\Documents\\StarCraft\\Maps\\CWAL`,
-                hideShortReplays: true
-            };
+            home = await homeDir();
         } catch (error) {
             console.error('Failed to get home directory:', error);
-            return {
-                replayDownloadPath: 'C:\\Users\\Documents\\StarCraft\\Maps\\Replays\\CWAL',
-                mapDownloadPath: 'C:\\Users\\Documents\\StarCraft\\Maps\\CWAL',
-                hideShortReplays: true
-            };
         }
+        return {
+            replayDownloadPath: `${home}\\StarCraft\\Maps\\Replays\\CWAL`,
+            mapDownloadPath: `${home}\\StarCraft\\Maps\\CWAL`,
+            hideShortReplays: true,
+            maxApiRequestsTps: 1,
+            maxReplayDownloadsTps: 0.1
+        };
     }
 
     updateReplayPath = async (path: string) => {
@@ -101,6 +101,35 @@ export class SettingsStore {
             console.error('Failed to update profile viewing preferences:', error);
             toast.error('Failed to update profile viewing preferences');
         }
+    }
+
+    updateMaxApiRequestsTps = async (value: number) => {
+        try {
+            this._settings.maxApiRequestsTps = value;
+            await this.saveSettings();
+            toast.success('API rate preference updated');
+        } catch (error) {
+            console.error('Failed to update API TPS:', error);
+            toast.error('Failed to update API rate preference');
+        }
+    }
+
+    updateMaxReplayDownloadsTps = async (value: number) => {
+        try {
+            this._settings.maxReplayDownloadsTps = value;
+            await this.saveSettings();
+            toast.success('Replay download rate preference updated');
+        } catch (error) {
+            console.error('Failed to update replay TPS:', error);
+            toast.error('Failed to update replay download rate preference');
+        }
+    }
+
+    resetToDefaults = async () => {
+        const defaults = await SettingsStore.getDefaultSettings();
+        this._settings = defaults;
+        await this.saveSettings();
+        toast.success('Settings reset to defaults');
     }
 
     private saveSettings = async () => {

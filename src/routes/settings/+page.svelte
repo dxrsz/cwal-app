@@ -25,9 +25,7 @@
   let replayPath = $state("");
   let mapPath = $state("");
   let maxApiRequestsTps = $state(0);
-  let maxReplayDownloadsTps = $state(0);
   let maxApiRequestsTpsInput = $state("");
-  let maxReplayDownloadsTpsInput = $state("");
   let initialized = $state(false);
 
   let resolvedDefaults = $state<AppSettings | null>(null);
@@ -39,10 +37,7 @@
     mapPath = settings.mapDownloadPath;
     maxApiRequestsTps =
       settings.maxApiRequestsTps ?? resolvedDefaults.maxApiRequestsTps;
-    maxReplayDownloadsTps =
-      settings.maxReplayDownloadsTps ?? resolvedDefaults.maxReplayDownloadsTps;
     maxApiRequestsTpsInput = String(maxApiRequestsTps);
-    maxReplayDownloadsTpsInput = String(maxReplayDownloadsTps);
     initialized = true;
   });
 
@@ -129,28 +124,6 @@
     else
       maxApiRequestsTps = resolvedDefaults
         ? resolvedDefaults.maxApiRequestsTps
-        : 0;
-  });
-
-  const setMaxReplayDownloadsTps = debounce(async (val: number) => {
-    const store = await settingsStorePromise;
-    if (val !== store.settings.maxReplayDownloadsTps) {
-      store.updateMaxReplayDownloadsTps(val);
-    }
-  }, 800);
-
-  $effect(() => {
-    if (!initialized) return;
-    setMaxReplayDownloadsTps(maxReplayDownloadsTps);
-  });
-
-  $effect(() => {
-    if (!initialized) return;
-    const v = parseFloat(maxReplayDownloadsTpsInput);
-    if (!isNaN(v)) maxReplayDownloadsTps = v;
-    else
-      maxReplayDownloadsTps = resolvedDefaults
-        ? resolvedDefaults.maxReplayDownloadsTps
         : 0;
   });
 </script>
@@ -307,48 +280,6 @@
             <p class="text-xs text-muted-foreground">
               Default: {resolvedDefaults
                 ? resolvedDefaults.maxApiRequestsTps
-                : "…"}
-            </p>
-          </div>
-        </div>
-
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <label class="text-sm font-medium" for="replay-tps"
-              >Replay Downloads TPS</label
-            >
-            <Button
-              variant="ghost"
-              size="sm"
-              class="h-6 px-2 text-xs cursor-pointer"
-              onclick={() => {
-                if (resolvedDefaults) {
-                  maxReplayDownloadsTps =
-                    resolvedDefaults.maxReplayDownloadsTps;
-                  maxReplayDownloadsTpsInput = String(
-                    resolvedDefaults.maxReplayDownloadsTps,
-                  );
-                }
-              }}
-              disabled={!resolvedDefaults ||
-                maxReplayDownloadsTps ===
-                  resolvedDefaults?.maxReplayDownloadsTps}
-            >
-              <RotateCcw class="size-3 mr-1" />Reset
-            </Button>
-          </div>
-          <div class="flex gap-2 items-center">
-            <Input
-              id="replay-tps"
-              type="number"
-              min="0"
-              step="0.05"
-              class="w-32"
-              bind:value={maxReplayDownloadsTpsInput}
-            />
-            <p class="text-xs text-muted-foreground">
-              Default: {resolvedDefaults
-                ? resolvedDefaults.maxReplayDownloadsTps
                 : "…"}
             </p>
           </div>

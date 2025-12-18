@@ -7,7 +7,6 @@ export interface AppSettings {
     mapDownloadPath: string;
     hideShortReplays: boolean;
     maxApiRequestsTps: number;
-    maxReplayDownloadsTps: number;
 }
 
 export class SettingsStore {
@@ -72,7 +71,6 @@ export class SettingsStore {
             mapDownloadPath: `${home}\\StarCraft\\Maps\\CWAL`,
             hideShortReplays: true,
             maxApiRequestsTps: 1,
-            maxReplayDownloadsTps: 0.1
         };
     }
 
@@ -118,17 +116,6 @@ export class SettingsStore {
         } catch (error) {
             console.error('Failed to update API TPS:', error);
             toast.error('Failed to update API rate preference');
-        }
-    }
-
-    updateMaxReplayDownloadsTps = async (value: number) => {
-        try {
-            this._settings.maxReplayDownloadsTps = value;
-            await this.saveSettings();
-            toast.success('Replay download rate preference updated');
-        } catch (error) {
-            console.error('Failed to update replay TPS:', error);
-            toast.error('Failed to update replay download rate preference');
         }
     }
 

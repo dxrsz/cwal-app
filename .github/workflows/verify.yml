@@ -1,0 +1,59 @@
+name: Verify
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  verify:
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+          components: clippy, rustfmt
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v2.x
+
+      - name: Install dependencies
+        run: deno install
+
+      - name: Check Formatting (Frontend)
+        run: deno run -A npm:prettier --check .
+
+      - name: Check Formatting (Backend)
+        run: cargo fmt -- --check
+
+      - name: Lint (Backend)
+        run: cargo clippy -- -D warnings
+
+      - name: Type Check (Frontend)
+        run: deno task check
+
+      - name: Test (Backend)
+        run: cargo test
+
+      - name: Build
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # We don't need to release, just build
+          releaseId: ${{ null }}
+          args: --debug

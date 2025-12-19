@@ -25,14 +25,15 @@ jobs:
         with:
           targets: x86_64-pc-windows-msvc
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          deno-version: v2.x
+          node-version: 22
+          cache: "npm"
 
       - name: Install dependencies
-        # Deno will install dependencies from package.json into node_modules
-        run: deno install
+        # npm ci ensures clean install from lockfile
+        run: npm ci
 
       - name: Build the app
         uses: tauri-apps/tauri-action@v0

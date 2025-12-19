@@ -4,9 +4,9 @@
   "version": "0.6.0",
   "identifier": "gg.cwal.app",
   "build": {
-    "beforeDevCommand": "deno task dev",
+    "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "deno task build",
+    "beforeBuildCommand": "npm run build",
     "frontendDist": "../build"
   },
   "app": {

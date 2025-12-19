@@ -8,14 +8,14 @@ format: format-frontend format-backend
 
 # Frontend verification
 check-frontend:
-	deno run -A npm:prettier --check .
-	deno run -A npm:@sveltejs/kit sync && deno run -A npm:svelte-check --tsconfig ./tsconfig.json
+	npx prettier --check .
+	npx svelte-kit sync && npx svelte-check --tsconfig ./tsconfig.json
 
 check-watch:
-	deno run -A npm:@sveltejs/kit sync && deno run -A npm:svelte-check --tsconfig ./tsconfig.json --watch
+	npx svelte-kit sync && npx svelte-check --tsconfig ./tsconfig.json --watch
 
 format-frontend:
-	deno run -A npm:prettier --write .
+	npx prettier --write .
 
 # Backend verification
 # Using --manifest-path to run cargo commands from root without cd
@@ -35,11 +35,11 @@ test:
 build: build-frontend build-backend
 
 build-frontend:
-	deno run -A npm:vite build
+	npm run build
 
 build-backend:
 	cargo build --manifest-path src-tauri/Cargo.toml
 
 # Dev server
 dev:
-	deno run tauri dev
+	npm run tauri dev

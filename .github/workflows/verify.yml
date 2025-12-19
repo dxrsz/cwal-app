@@ -26,16 +26,17 @@ jobs:
           targets: x86_64-pc-windows-msvc
           components: clippy, rustfmt
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          deno-version: v2.x
+          node-version: 22
+          cache: "npm"
 
       - name: Install dependencies
-        run: deno install
+        run: npm ci
 
       - name: Check Formatting (Frontend)
-        run: deno run -A npm:prettier --check .
+        run: npm run lint
 
       - name: Check Formatting (Backend)
         run: cargo fmt -- --check
@@ -44,7 +45,7 @@ jobs:
         run: cargo clippy -- -D warnings
 
       - name: Type Check (Frontend)
-        run: deno task check
+        run: npm run check
 
       - name: Test (Backend)
         run: cargo test

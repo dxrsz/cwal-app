@@ -10,31 +10,20 @@ This template should help get you started developing with Tauri, SvelteKit and T
 
 Before opening a merge request, please ensure your code passes the following checks.
 
-### Frontend
+### Quick Start
 
-Run these commands to verify the Svelte/TypeScript code:
-
-```bash
-npx prettier --check .
-
-deno task check
-```
-
-### Backend
-
-Run these commands to verify the Rust code:
+Run these commands to verify your code before submitting a merge request:
 
 ```bash
-cd src-tauri
+# Run all checks (frontend + backend)
+make check
 
-cargo clippy && cargo test && cargo fmt -- --check
-```
+# Format all code
+make format
 
-### Verification
+# Run backend tests
+make test
 
-The verification workflow will automatically run these checks on any pull request. You can run the full build locally to ensure everything works:
-
-```bash
-deno task build
-cargo build
+# Build the application
+make build
 ```

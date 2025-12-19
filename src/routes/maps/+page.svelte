@@ -13,7 +13,6 @@
   import { getSettingsStore } from "@/lib/settingsStore.svelte";
 
   let gb: Promise<GravaticBooster> = getGb();
-  const settingsStore = getSettingsStore();
 
   let currentSeason: number = $state(0);
   let season: string | undefined = $state(undefined);
@@ -35,10 +34,7 @@
     fileName: string;
     seasonId: number;
   }) => {
-    if (!settingsStore.initialized) {
-      toast.error("Settings not loaded yet. Please try again.");
-      return;
-    }
+    const store = await getSettingsStore();
 
     const mapKey = `${map.fileName}_${map.url}`;
     if (downloadingMaps.has(mapKey)) {
@@ -49,7 +45,7 @@
     downloadingMaps = new Set(downloadingMaps);
 
     try {
-      const seasonDirectory = `${settingsStore.getSettings.mapDownloadPath}\\Season ${map.seasonId}`;
+      const seasonDirectory = `${store.settings.mapDownloadPath}\\Season ${map.seasonId}`;
       const result = await invoke<string>("download_file", {
         url: map.url,
         destinationPath: seasonDirectory,

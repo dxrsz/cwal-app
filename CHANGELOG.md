@@ -8,12 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.6.0] - 2025-12-19
 
 ### Added
-- Page for saving players
-### Fixed
-- Various UI issues
 
+- Page for saving players
+
+### Fixed
+
+- Various UI issues
 
 ## [0.5.0] - 2025-12-18
 
 ### Added
+
 - Initial release.

@@ -21,9 +21,9 @@ impl fmt::Display for ParseError {
 
 impl std::error::Error for ParseError {}
 
-impl<T> From<nom::Err<nom::error::Error<T>>> for ParseError 
+impl<T> From<nom::Err<nom::error::Error<T>>> for ParseError
 where
-    T: Into<Vec<u8>>
+    T: Into<Vec<u8>>,
 {
     fn from(err: nom::Err<nom::error::Error<T>>) -> Self {
         match err {

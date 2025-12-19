@@ -49,7 +49,11 @@
     </div>
 
     <div class="flex flex-col sm:flex-row gap-3 justify-center">
-      <Button onclick={goBack} variant="outline" class="min-w-[120px] cursor-pointer">
+      <Button
+        onclick={goBack}
+        variant="outline"
+        class="min-w-[120px] cursor-pointer"
+      >
         Go Back
       </Button>
       <Button onclick={goHome} class="min-w-[120px] cursor-pointer">

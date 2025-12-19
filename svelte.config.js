@@ -9,11 +9,11 @@ const config = {
   preprocess: vitePreprocess(),
   kit: {
     adapter: adapter({
-      fallback: 'index.html'
+      fallback: "index.html",
     }),
     alias: {
-      "@/*": "./src/*"
-    }
+      "@/*": "./src/*",
+    },
   },
 };
 

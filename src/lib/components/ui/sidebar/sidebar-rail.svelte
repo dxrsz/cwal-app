@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { cn, type WithElementRef } from "@/lib/utils.js";
   import type { HTMLAttributes } from "svelte/elements";
+
+  import { type WithElementRef, cn } from "@/lib/utils.js";
+
   import { useSidebar } from "./context.svelte.js";
 
   let {
@@ -31,7 +33,7 @@
     "hover:group-data-[collapsible=offcanvas]:bg-sidebar group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full",
     "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
     "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
-    className
+    className,
   )}
   {...restProps}
 >

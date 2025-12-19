@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { cn, type WithElementRef } from "@/lib/utils.js";
   import type { HTMLAttributes } from "svelte/elements";
+
+  import { type WithElementRef, cn } from "@/lib/utils.js";
 
   let {
     ref = $bindable(null),
@@ -21,7 +22,7 @@
     "peer-data-[size=default]/menu-button:top-1.5",
     "peer-data-[size=lg]/menu-button:top-2.5",
     "group-data-[collapsible=icon]:hidden",
-    className
+    className,
   )}
   {...restProps}
 >

@@ -1,29 +1,31 @@
-# Tauri + SvelteKit + TypeScript
+# CWAL Desktop App
 
-This template should help get you started developing with Tauri, SvelteKit and TypeScript in Vite.
+Explore the StarCraft: Remastered ladder data.
 
-## Recommended IDE Setup
+## Downloading
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
+See the releases page for the latest release.
 
-## Contributing
+## Development
 
-Before opening a merge request, please ensure your code passes the following checks.
+### Prerequisites
 
-### Quick Start
+See here: https://v2.tauri.app/start/prerequisites/#windows
 
-Run these commands to verify your code before submitting a merge request:
+### Workflow
+
+Run the app with:
 
 ```bash
-# Run all checks (frontend + backend)
-make check
+make dev
+```
 
-# Format all code
-make format
+And it should start the app with hot reloading enabled.
 
-# Run backend tests
-make test
+### Contributing
 
-# Build the application
-make build
+Before opening a merge request, please ensure your code passes the following checks:
+
+```bash
+make check test build
 ```

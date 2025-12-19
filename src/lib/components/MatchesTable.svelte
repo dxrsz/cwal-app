@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
 
   import type { GravaticBooster, Match } from "gravatic-booster";
 
@@ -49,7 +49,7 @@
   }: Props = $props();
 
   // Internal reactive matches state
-  let internalMatches: Match[] = $state([...matches]);
+  let internalMatches: Match[] = $state(untrack(() => [...matches]));
 
   const MATCH_FETCH_NUM = 15;
   let matchesGenerator: AsyncGenerator<Match, void, void> | null = null;

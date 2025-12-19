@@ -21,7 +21,7 @@ impl ScrProcessEventProvider {
 
                 if let Some(pid) = pid {
                     if let Some(port) = find_starcraft_api_port(&pid) {
-                        event_handler.lock().unwrap()(ScrEvent::WebServerRunning { port: port });
+                        event_handler.lock().unwrap()(ScrEvent::WebServerRunning { port });
                         continue;
                     }
                 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, untrack } from "svelte";
 
   import { invoke } from "@tauri-apps/api/core";
   import type { Match } from "gravatic-booster";
@@ -40,7 +40,9 @@
 
   const { match, replayData, onOpenChat, onSetReplayData }: Props = $props();
 
-  let internalReplayData = $state<ReplayDataMinimal | undefined>(replayData);
+  let internalReplayData = $state<ReplayDataMinimal | undefined>(
+    untrack(() => replayData),
+  );
   let loading = $state(false);
   const settingsStorePromise = getSettingsStore();
   let settingsStore: Awaited<ReturnType<typeof getSettingsStore>> | null = null;

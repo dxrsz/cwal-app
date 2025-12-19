@@ -1,16 +1,13 @@
 use nom::{bytes::complete::take, number::complete::le_u32, IResult};
 
-pub mod colors;
 pub mod error;
 pub mod frames;
 pub mod game_info;
 pub mod header;
 
-pub use colors::PlayerColor;
 pub use error::ParseError;
 pub use frames::{Command, Frame};
 pub use game_info::{GameInfo, PlayerStruct};
-pub use header::Header;
 
 #[derive(Debug, Clone)]
 pub struct ChatMessage {
@@ -41,50 +38,24 @@ impl<'a> ReplayParser<'a> {
         let (remaining, game_info) = game_info::parse_game_info_section(remaining)?;
 
         let (remaining, _) = skip_section(remaining).map_err(|e| {
-            ParseError::InvalidData(format!("Failed to skip section size section: {:?}", e))
+            ParseError::InvalidData(format!("Failed to skip section size section: {e:?}"))
         })?;
 
         let (_, frames) = frames::parse_frames_section(remaining)?;
 
-        Ok(ParsedReplay {
-            header,
-            game_info,
-            frames,
-            player_colors: vec![],
-        })
+        Ok(ParsedReplay { game_info, frames })
     }
 }
 
 #[derive(Debug)]
 pub struct ParsedReplay {
-    pub header: Header,
     pub game_info: GameInfo,
     pub frames: Vec<Frame>,
-    pub player_colors: Vec<Option<PlayerColor>>,
 }
 
 impl ParsedReplay {
     pub fn duration_ms(&self) -> u32 {
         self.game_info.frames * 42 // 42 ms per frame
-    }
-
-    pub fn duration_minutes(&self) -> f32 {
-        self.duration_ms() as f32 / 1000.0 / 60.0
-    }
-
-    pub fn player_apm(&self, player_id: u8) -> u32 {
-        let command_count = self
-            .frames
-            .iter()
-            .flat_map(|frame| &frame.commands)
-            .filter(|cmd| cmd.player_id == player_id)
-            .count();
-
-        if self.duration_minutes() > 0.0 {
-            (command_count as f32 / self.duration_minutes()) as u32
-        } else {
-            0
-        }
     }
 
     pub fn chat_messages(&self) -> Vec<ChatMessage> {
@@ -140,7 +111,7 @@ impl ParsedReplay {
             .iter()
             .find(|p| p.slot_id == sender_id as u16)
             .map(|p| p.name.clone())
-            .unwrap_or_else(|| format!("Player {}", sender_id));
+            .unwrap_or_else(|| format!("Player {sender_id}"));
 
         Some(ChatMessage {
             sender_name,

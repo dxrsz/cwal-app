@@ -31,7 +31,7 @@ fn init_process(window: Window) {
     std::thread::spawn(move || {
         let window = Mutex::new(Arc::new(window));
         let mut _listen = ScrProcessEventProvider::new(Arc::new(Mutex::new(move |event| {
-            println!("event: {:?}", event);
+            println!("event: {event:?}");
             let window = window.lock().unwrap();
             window.emit("scr-event", event).unwrap();
         })));
@@ -46,7 +46,7 @@ fn read_settings_file(path: String) -> Result<String, String> {
             if e.kind() == std::io::ErrorKind::NotFound {
                 Ok(String::new())
             } else {
-                Err(format!("Failed to read settings file: {}", e))
+                Err(format!("Failed to read settings file: {e}"))
             }
         }
     }
@@ -56,13 +56,13 @@ fn read_settings_file(path: String) -> Result<String, String> {
 fn write_settings_file(path: String, content: String) -> Result<(), String> {
     if let Some(parent) = Path::new(&path).parent() {
         if let Err(e) = fs::create_dir_all(parent) {
-            return Err(format!("Failed to create directory: {}", e));
+            return Err(format!("Failed to create directory: {e}"));
         }
     }
 
     match fs::write(&path, content) {
         Ok(_) => Ok(()),
-        Err(e) => Err(format!("Failed to write settings file: {}", e)),
+        Err(e) => Err(format!("Failed to write settings file: {e}")),
     }
 }
 
@@ -78,7 +78,7 @@ async fn download_file(
     let full_path = Path::new(&destination_path).join(&filename);
     if let Some(parent) = full_path.parent() {
         if let Err(e) = fs::create_dir_all(parent) {
-            return Err(format!("Failed to create directory: {}", e));
+            return Err(format!("Failed to create directory: {e}"));
         }
     }
 
@@ -88,10 +88,10 @@ async fn download_file(
             url,
             cached.display()
         );
-        fs::copy(&cached, &full_path).map_err(|e| format!("Failed to copy from cache: {}", e))?;
+        fs::copy(&cached, &full_path).map_err(|e| format!("Failed to copy from cache: {e}"))?;
         return Ok(full_path.to_string_lossy().to_string());
     } else {
-        println!("[replay-cache] No cache for {}, downloading", url);
+        println!("[replay-cache] No cache for {url}, downloading");
     }
 
     let client = reqwest::Client::new();
@@ -99,7 +99,7 @@ async fn download_file(
         .get(&url)
         .send()
         .await
-        .map_err(|e| format!("Failed to download file: {}", e))?;
+        .map_err(|e| format!("Failed to download file: {e}"))?;
     if !response.status().is_success() {
         return Err(format!(
             "Download failed with status: {}",
@@ -109,9 +109,9 @@ async fn download_file(
     let bytes = response
         .bytes()
         .await
-        .map_err(|e| format!("Failed to read response: {}", e))?;
+        .map_err(|e| format!("Failed to read response: {e}"))?;
 
-    fs::write(&full_path, &bytes).map_err(|e| format!("Failed to write file: {}", e))?;
+    fs::write(&full_path, &bytes).map_err(|e| format!("Failed to write file: {e}"))?;
     let _ = cache.put(&url, &filename, &bytes);
     Ok(full_path.to_string_lossy().to_string())
 }
@@ -137,7 +137,7 @@ fn parse_replay_bytes(bytes: &[u8]) -> Result<(u32, u64, Vec<ParsedChatMessage>)
     let parser = ReplayParser::new(bytes);
     let parsed = parser
         .parse()
-        .map_err(|e| format!("Failed to parse replay: {:?}", e))?;
+        .map_err(|e| format!("Failed to parse replay: {e:?}"))?;
 
     let duration_ms = parsed.duration_ms();
     let start_time_ms = parsed
@@ -179,15 +179,15 @@ async fn download_and_parse_replay(
             url,
             cached_path.display()
         );
-        fs::read(cached_path).map_err(|e| format!("Failed to read cached file: {}", e))?
+        fs::read(cached_path).map_err(|e| format!("Failed to read cached file: {e}"))?
     } else {
-        println!("[replay-cache] No cache for {}, downloading for parse", url);
+        println!("[replay-cache] No cache for {url}, downloading for parse");
         let client = reqwest::Client::new();
         let response = client
             .get(&url)
             .send()
             .await
-            .map_err(|e| format!("Failed to download file: {}", e))?;
+            .map_err(|e| format!("Failed to download file: {e}"))?;
         if !response.status().is_success() {
             return Err(format!(
                 "Download failed with status: {}",
@@ -197,7 +197,7 @@ async fn download_and_parse_replay(
         let b = response
             .bytes()
             .await
-            .map_err(|e| format!("Failed to read response: {}", e))?;
+            .map_err(|e| format!("Failed to read response: {e}"))?;
         let vec = b.to_vec();
         let _ = cache.put(&url, &filename, &vec);
         vec

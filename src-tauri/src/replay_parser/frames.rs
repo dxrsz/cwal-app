@@ -13,7 +13,6 @@ pub struct Frame {
 
 #[derive(Debug)]
 pub struct Command {
-    pub player_id: u8,
     pub command_type: u8,
     pub data: Vec<u8>,
 }
@@ -99,7 +98,7 @@ fn parse_commands(data: &[u8]) -> Result<Vec<Command>, ParseError> {
 }
 
 fn parse_command(input: &[u8]) -> Result<(&[u8], Command), ParseError> {
-    let (input, player_id) = le_u8(input)?;
+    let (input, _player_id) = le_u8(input)?;
     let (input, command_type) = le_u8(input)?;
 
     let (input, data) = match command_type {
@@ -133,14 +132,7 @@ fn parse_command(input: &[u8]) -> Result<(&[u8], Command), ParseError> {
         }
     };
 
-    Ok((
-        input,
-        Command {
-            player_id,
-            command_type,
-            data,
-        },
-    ))
+    Ok((input, Command { command_type, data }))
 }
 
 fn decompress_zlib_chunk(data: &[u8]) -> Result<Vec<u8>, Box<dyn std::error::Error>> {

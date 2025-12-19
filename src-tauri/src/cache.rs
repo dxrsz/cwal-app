@@ -15,7 +15,7 @@ pub struct ReplayCache {
 impl ReplayCache {
     pub fn new(dir: PathBuf, cap: usize) -> Self {
         if let Err(e) = fs::create_dir_all(&dir) {
-            println!("[replay-cache] Failed to create cache dir {:?}: {}", dir, e);
+            println!("[replay-cache] Failed to create cache dir {dir:?}: {e}");
         }
         Self {
             dir,
@@ -35,7 +35,7 @@ impl ReplayCache {
         url.hash(&mut hasher);
         let h = hasher.finish();
         // keep extension generic; consumers copy with their own filename
-        self.dir.join(format!("{:016x}.rep", h))
+        self.dir.join(format!("{h:016x}.rep"))
     }
 
     pub fn get(&self, url: &str) -> Option<PathBuf> {
@@ -52,7 +52,7 @@ impl ReplayCache {
                 lru.pop(&key);
             }
         }
-        println!("[replay-cache] MISS for {}", url);
+        println!("[replay-cache] MISS for {url}");
         None
     }
 
@@ -60,12 +60,12 @@ impl ReplayCache {
         use std::io::Write;
         let path = self.hashed_path_for(url);
         if let Some(parent) = path.parent() {
-            fs::create_dir_all(parent).map_err(|e| format!("Failed to create cache dir: {}", e))?;
+            fs::create_dir_all(parent).map_err(|e| format!("Failed to create cache dir: {e}"))?;
         }
         let mut f =
-            fs::File::create(&path).map_err(|e| format!("Failed to create cache file: {}", e))?;
+            fs::File::create(&path).map_err(|e| format!("Failed to create cache file: {e}"))?;
         f.write_all(bytes)
-            .map_err(|e| format!("Failed to write cache file: {}", e))?;
+            .map_err(|e| format!("Failed to write cache file: {e}"))?;
         let key = Self::key(url);
         if let Ok(mut lru) = self.lru.lock() {
             lru.put(key, path.clone());

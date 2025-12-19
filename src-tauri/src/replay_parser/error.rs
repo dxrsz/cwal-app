@@ -5,16 +5,14 @@ pub enum ParseError {
     NomError(nom::Err<nom::error::Error<Vec<u8>>>),
     UnsupportedVersion(String),
     InvalidData(String),
-    DecompressionError(String),
 }
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ParseError::NomError(e) => write!(f, "Parse error: {:?}", e),
-            ParseError::UnsupportedVersion(v) => write!(f, "Unsupported replay version: {}", v),
-            ParseError::InvalidData(msg) => write!(f, "Invalid data: {}", msg),
-            ParseError::DecompressionError(msg) => write!(f, "Decompression error: {}", msg),
+            ParseError::NomError(e) => write!(f, "Parse error: {e:?}"),
+            ParseError::UnsupportedVersion(v) => write!(f, "Unsupported replay version: {v}"),
+            ParseError::InvalidData(msg) => write!(f, "Invalid data: {msg}"),
         }
     }
 }

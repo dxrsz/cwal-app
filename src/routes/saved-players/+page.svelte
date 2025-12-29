@@ -53,10 +53,7 @@
           if (acct && acct.rankings) {
             const newProfiles = acct.rankings.map((r) => ({
               toon: r.toon,
-              gateway:
-                typeof r.gatewayId === "string"
-                  ? Number.parseInt(r.gatewayId)
-                  : Number(r.gatewayId),
+              gateway: r.gatewayId,
               lastViewed: Date.now(),
               race: r.featureRace,
               avatarUrl: avatarOrDefault(r.avatar),

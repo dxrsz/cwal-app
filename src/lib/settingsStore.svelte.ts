@@ -66,7 +66,7 @@ export class SettingsStore {
       replayDownloadPath: `${home}\\StarCraft\\Maps\\Replays\\CWAL`,
       mapDownloadPath: `${home}\\StarCraft\\Maps\\CWAL`,
       hideShortReplays: true,
-      maxApiRequestsTps: 1,
+      maxApiRequestsTps: 10,
     };
   };
 

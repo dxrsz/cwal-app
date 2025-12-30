@@ -36,9 +36,16 @@
     replayData?: ReplayDataMinimal;
     onOpenChat: (messages: ChatMessage[]) => void;
     onSetReplayData?: (data: ReplayDataMinimal) => void;
+    isBlurred?: boolean;
   }
 
-  const { match, replayData, onOpenChat, onSetReplayData }: Props = $props();
+  const {
+    match,
+    replayData,
+    onOpenChat,
+    onSetReplayData,
+    isBlurred = false,
+  }: Props = $props();
 
   let internalReplayData = $state<ReplayDataMinimal | undefined>(
     untrack(() => replayData),
@@ -260,7 +267,20 @@
   });
 </script>
 
-<tr class="hover:bg-muted/50">
+<tr
+  class="group hover:bg-muted/50 transition-all duration-300"
+  class:blurred={isBlurred}
+>
+  <style>
+    .blurred {
+      filter: blur(2px) grayscale(0.7);
+      opacity: 0.6;
+    }
+    .blurred:hover {
+      filter: blur(0px) grayscale(0);
+      opacity: 1;
+    }
+  </style>
   <td class="font-medium">
     {#if gameDate && relativeTime}
       <Tooltip.Root>

@@ -106,22 +106,14 @@
   let selectedChatMessages: ChatMessage[] = $state([]);
   let showChatDialog = $state(false);
 
-  // Filter matches based on hideShortMatches setting (reacts when cache updates)
-  let filteredMatches = $derived.by(() => {
-    const list = internalMatches;
-    if (!hideShortMatches) return list;
-    return list.filter((match) => {
-      const key = match.name || match.id;
-      if (!replayDataCache.has(key)) return true;
-      const replayData = replayDataCache.get(key);
-      if (!replayData?.parsed_data?.game_duration_ms) {
-        return true; // Include if we can't determine duration
-      }
-
-      // Hide matches shorter than 1 minute (60000ms)
-      return replayData.parsed_data.game_duration_ms >= 60000;
-    });
-  });
+  // Determine if a match should be blurred
+  const isMatchBlurred = (match: Match) => {
+    if (!hideShortMatches) return false;
+    const key = match.name || match.id;
+    const replayData = replayDataCache.get(key);
+    if (!replayData?.parsed_data?.game_duration_ms) return false;
+    return replayData.parsed_data.game_duration_ms < 60000;
+  };
   const setReplayData = (key: string, data: ReplayDataMinimal) => {
     if (!key) return;
     const newCache = new Map(replayDataCache);
@@ -158,13 +150,14 @@
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {#if filteredMatches.length > 0}
-            {#each filteredMatches as match}
+          {#if internalMatches.length > 0}
+            {#each internalMatches as match}
               {#key match.id}
                 <MatchRow
                   {match}
                   replayData={replayDataCache.get(match.name || match.id) ||
                     undefined}
+                  isBlurred={isMatchBlurred(match)}
                   onOpenChat={(msgs) => showChatMessages(msgs)}
                   onSetReplayData={(data) =>
                     setReplayData(match.name || match.id, data)}

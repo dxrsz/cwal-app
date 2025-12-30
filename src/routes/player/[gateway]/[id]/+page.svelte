@@ -475,10 +475,10 @@
       <div class="flex items-center justify-between bg-muted/20 rounded-lg p-4">
         <div class="space-y-1">
           <label class="text-sm font-medium" for="hide-short-matches"
-            >Hide short matches</label
+            >Blur short matches</label
           >
           <p class="text-xs text-muted-foreground">
-            Hide matches shorter than 1 minute from the list
+            Blur matches shorter than 1 minute from the list
           </p>
         </div>
         <Switch

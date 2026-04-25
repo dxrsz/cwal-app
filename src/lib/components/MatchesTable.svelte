@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, untrack } from "svelte";
+  import { tick, untrack } from "svelte";
 
   import type { GravaticBooster, Match } from "gravatic-booster";
 
@@ -37,7 +37,6 @@
     loading?: boolean;
     hideShortMatches?: boolean;
     onFetchReplayData?: (match: Match) => void;
-    onFetcherReady?: (fetcher: () => Promise<boolean>) => void;
   }
 
   let {
@@ -45,16 +44,18 @@
     profile = null,
     loading = false,
     hideShortMatches = false,
-    onFetcherReady,
   }: Props = $props();
 
   // Internal reactive matches state
   let internalMatches: Match[] = $state(untrack(() => [...matches]));
 
   const MATCH_FETCH_NUM = 15;
+  const SCROLL_LOAD_MARGIN_PX = 200;
   let matchesGenerator: AsyncGenerator<Match, void, void> | null = null;
   let internalLoading = $state(false);
   let lastProfileRef: MinimalAccount | null = null;
+  let sentinel = $state<HTMLDivElement | null>(null);
+  let pumping = false;
 
   const ensureGenerator = async () => {
     if (matchesGenerator || !profile?.requestedProfile) return;
@@ -66,16 +67,7 @@
     }
   };
 
-  $effect(() => {
-    if (profile !== lastProfileRef) {
-      internalMatches = [];
-      matchesGenerator = null;
-      lastProfileRef = profile;
-      void ensureGenerator();
-    }
-  });
-
-  const fetchMore = async (): Promise<boolean> => {
+  const fetchBatch = async (): Promise<boolean> => {
     if (internalLoading) return false;
     await ensureGenerator();
     if (!matchesGenerator) return false;
@@ -86,7 +78,6 @@
         const next = await matchesGenerator.next();
         if (next.done) break;
         internalMatches.push(next.value);
-        // force reactivity in case push doesn't trigger
         internalMatches = internalMatches;
         fetchedAny = true;
       }
@@ -98,8 +89,52 @@
     return fetchedAny;
   };
 
-  onMount(() => {
-    onFetcherReady?.(fetchMore);
+  // Sentinel sits below the last row. While it's near the viewport bottom,
+  // we keep fetching — that single condition covers both "fill an empty
+  // page" and "user scrolled near the end". getBoundingClientRect gives us
+  // a synchronous, layout-accurate read after each batch.
+  const isSentinelNearViewport = () => {
+    const el = sentinel;
+    if (!el) return false;
+    const rect = el.getBoundingClientRect();
+    return rect.top < window.innerHeight + SCROLL_LOAD_MARGIN_PX;
+  };
+
+  const pump = async () => {
+    if (pumping) return;
+    pumping = true;
+    try {
+      while (isSentinelNearViewport()) {
+        const fetched = await fetchBatch();
+        if (!fetched) break;
+        await tick();
+      }
+    } finally {
+      pumping = false;
+    }
+  };
+
+  // Reset and refill when profile changes.
+  $effect(() => {
+    if (profile !== lastProfileRef) {
+      internalMatches = [];
+      matchesGenerator = null;
+      lastProfileRef = profile;
+      void pump();
+    }
+  });
+
+  // Re-pump whenever the sentinel scrolls back into view.
+  $effect(() => {
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) void pump();
+      },
+      { rootMargin: `${SCROLL_LOAD_MARGIN_PX}px` },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
   });
 
   let replayDataCache = $state(new Map<string, ReplayDataMinimal>());
@@ -213,6 +248,7 @@
         </Table.Body>
       </Table.Root>
     </Tooltip.Provider>
+    <div bind:this={sentinel} aria-hidden="true" class="h-px"></div>
   </Card.Content>
 </Card.Root>
 

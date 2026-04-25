@@ -1,12 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  import { afterNavigate, goto } from "$app/navigation";
-  import { page } from "$app/state";
+  import { afterNavigate } from "$app/navigation";
   import Bookmark from "@lucide/svelte/icons/bookmark";
   import BookmarkCheck from "@lucide/svelte/icons/bookmark-check";
   import Pencil from "@lucide/svelte/icons/pencil";
-  import type { GravaticBooster, Ranking } from "gravatic-booster";
 
   import CountryFlag from "@/lib/components/CountryFlag.svelte";
   import MatchesTable from "@/lib/components/MatchesTable.svelte";
@@ -19,11 +17,6 @@
   import Label from "@/lib/components/ui/label/label.svelte";
   import { Skeleton } from "@/lib/components/ui/skeleton";
   import { Switch } from "@/lib/components/ui/switch";
-  import {
-    type SavedPlayersStore,
-    getSavedPlayersStore,
-  } from "@/lib/savedPlayersStore.svelte";
-  import { getGb, sleep } from "@/lib/scApi.svelte";
   import { getSettingsStore } from "@/lib/settingsStore.svelte";
   import { avatarOrDefault, debounce } from "@/lib/utils";
 
@@ -31,40 +24,48 @@
 
   const { data }: PageProps = $props();
 
-  let id: string = $derived(data.id);
-  let gateway: string = $derived(data.gateway);
+  type Details = Awaited<typeof data.details>;
 
-  const gb = getGb();
+  // `data.details` is a streamed promise: SvelteKit completes the navigation
+  // immediately (header + skeletons render right away) and we fill `details`
+  // in one atomic write when it resolves. The single-bundle assignment is
+  // what keeps us out of the original split-state bug class — every read of
+  // `details` either sees null or the full bundle, never half of one and
+  // half of another.
+  let id = $derived(data.id);
+  let gateway = $derived(data.gateway);
+  let savedPlayersStore = $derived(data.savedPlayersStore);
+
+  let details = $state<Details | null>(null);
+
+  $effect(() => {
+    const promise = data.details;
+    details = null;
+    let cancelled = false;
+    promise.then((d) => {
+      if (!cancelled) details = d;
+    });
+    return () => {
+      cancelled = true;
+    };
+  });
+
+  let profile = $derived(details?.profile ?? null);
+  let ranking = $derived(details?.ranking ?? null);
+  let otherRankings = $derived(details?.otherRankings ?? []);
+
   const settingsStorePromise = getSettingsStore();
-  const savedPlayersStorePromise = getSavedPlayersStore();
 
-  let savedPlayersStore: SavedPlayersStore | null = $state(null);
-  let profile: Awaited<
-    ReturnType<
-      typeof GravaticBooster.prototype.minimalAccountWithGamesPlayedLastWeek
-    >
-  > | null = $state(null);
-  let ranking: Ranking | null = $state(null);
-  let otherRankings: Ranking[] = $state([]);
-  let avatar = $derived.by(() => avatarOrDefault(ranking?.avatar));
+  let avatar = $derived(avatarOrDefault(ranking?.avatar));
 
-  // Matches now owned/fetched within MatchesTable; we keep a callback reference to trigger loading
-  let matchesTableFetchMore: (() => Promise<boolean>) | null = null;
-
-  let scrollableDiv: HTMLDivElement | null = $state(null);
-  let scrollTimeout: number | null = null;
   let hideShortMatches = $state(false);
 
-  // Saved player state
-  let isSaved = $derived.by(() => {
-    if (!savedPlayersStore || !profile?.auroraId) return false;
-    return savedPlayersStore.isSaved(profile.auroraId);
-  });
-
-  let savedDetails = $derived.by(() => {
-    if (!savedPlayersStore || !profile?.auroraId) return null;
-    return savedPlayersStore.getPlayer(profile.auroraId);
-  });
+  let isSaved = $derived(
+    profile?.auroraId ? savedPlayersStore.isSaved(profile.auroraId) : false,
+  );
+  let savedDetails = $derived(
+    profile?.auroraId ? savedPlayersStore.getPlayer(profile.auroraId) : null,
+  );
 
   let showEditAliasOpen = $state(false);
   let editAliasValue = $state("");
@@ -73,7 +74,6 @@
     try {
       const store = await settingsStorePromise;
       hideShortMatches = store.settings.hideShortReplays;
-      savedPlayersStore = await savedPlayersStorePromise;
     } catch (e) {
       console.error("Failed to load settings for player page", e);
     }
@@ -90,16 +90,22 @@
     updateHideShortMatches(hideShortMatches);
   });
 
-  // Helper to extract known profiles from current state
-  const getAllKnownProfiles = () => {
-    const currentProps = {
-      toon: id,
-      gateway: Number.parseInt(gateway),
+  // Build the canonical profile list from a fully-resolved details bundle.
+  // Taking the bundle as an argument (instead of reading reactive state)
+  // means callers can't accidentally pass a half-loaded view of the data.
+  const knownProfilesFrom = (
+    d: Details,
+    routeId: string,
+    routeGateway: string,
+  ) => [
+    {
+      toon: routeId,
+      gateway: Number.parseInt(routeGateway),
       lastViewed: Date.now(),
-      race: ranking?.featureRace,
-      avatarUrl: avatarOrDefault(ranking?.avatar),
-    };
-    const others = otherRankings.map((r) => ({
+      race: d.ranking?.featureRace,
+      avatarUrl: avatarOrDefault(d.ranking?.avatar),
+    },
+    ...d.otherRankings.map((r) => ({
       toon: r.toon,
       gateway:
         typeof r.gatewayId === "string"
@@ -108,31 +114,17 @@
       lastViewed: Date.now(),
       race: r.featureRace,
       avatarUrl: avatarOrDefault(r.avatar),
-    }));
-    return [currentProps, ...others];
-  };
-
-  // Auto-add profiles if player is saved
-  $effect(() => {
-    if (
-      savedPlayersStore &&
-      profile?.auroraId &&
-      savedPlayersStore.isSaved(profile.auroraId)
-    ) {
-      savedPlayersStore.setProfiles(profile.auroraId, getAllKnownProfiles());
-    }
-  });
+    })),
+  ];
 
   const toggleSave = () => {
-    if (!savedPlayersStore || !profile?.auroraId) return;
+    if (!details || !profile?.auroraId) return;
     if (isSaved) {
       savedPlayersStore.removePlayer(profile.auroraId);
     } else {
-      const initialProfiles = getAllKnownProfiles();
-      // savePlayer creates the player record if needed
-      savedPlayersStore.savePlayer(profile.auroraId, id, initialProfiles[0]);
-      // setProfiles ensures the full list is synced (removing any old ones if re-saving, and adding all new ones)
-      savedPlayersStore.setProfiles(profile.auroraId, initialProfiles);
+      const profiles = knownProfilesFrom(details, id, gateway);
+      savedPlayersStore.savePlayer(profile.auroraId, id, profiles[0]);
+      savedPlayersStore.setProfiles(profile.auroraId, profiles);
     }
   };
 
@@ -144,115 +136,30 @@
   };
 
   const saveAlias = () => {
-    if (savedPlayersStore && profile?.auroraId) {
+    if (profile?.auroraId) {
       savedPlayersStore.renamePlayer(profile.auroraId, editAliasValue);
       showEditAliasOpen = false;
     }
   };
 
-  const fetchMoreMatches = async () => {
-    if (!matchesTableFetchMore) return false;
-    try {
-      return await matchesTableFetchMore();
-    } catch (e) {
-      console.error("Error invoking MatchesTable fetchMore:", e);
-      return false;
-    }
-  };
-
-  const hasScrollbar = () => {
-    if (!scrollableDiv) return false;
-    return scrollableDiv.scrollHeight > scrollableDiv.clientHeight;
-  };
-
-  const fetchUntilScrollbarOrEnd = async () => {
-    const maxIterations = 50;
-    const maxTimeMs = 30000;
-    const startTime = Date.now();
-    let iterations = 0;
-    while (iterations < maxIterations) {
-      if (Date.now() - startTime > maxTimeMs) {
-        console.warn(
-          "fetchUntilScrollbarOrEnd timed out after",
-          maxTimeMs,
-          "ms",
+  // Per-navigation post-load action: sync the saved record once the streamed
+  // bundle resolves. Route id/gateway and the savedPlayersStore are captured
+  // up front so that even if the user has already navigated away by the time
+  // the promise resolves, we sync the *right* player's record (or do
+  // nothing, if `details` belongs to an aborted navigation).
+  afterNavigate(() => {
+    const promise = data.details;
+    const routeId = data.id;
+    const routeGateway = data.gateway;
+    const store = data.savedPlayersStore;
+    promise.then((d) => {
+      if (d.profile.auroraId && store.isSaved(d.profile.auroraId)) {
+        store.setProfiles(
+          d.profile.auroraId,
+          knownProfilesFrom(d, routeId, routeGateway),
         );
-        break;
       }
-      try {
-        const fetchedMatches = await fetchMoreMatches();
-        if (!fetchedMatches) break;
-        await sleep(100); // allow DOM update
-        if (hasScrollbar()) break;
-      } catch (error) {
-        console.error("Error in fetchUntilScrollbarOrEnd:", error);
-        break;
-      }
-      iterations++;
-    }
-    if (iterations >= maxIterations) {
-      console.warn(
-        "fetchUntilScrollbarOrEnd reached maximum iterations:",
-        maxIterations,
-      );
-    }
-  };
-
-  const onScroll = () => {
-    if (!scrollableDiv) return;
-    if (scrollTimeout) clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-      if (!scrollableDiv) return;
-      const { scrollHeight, scrollTop, clientHeight } = scrollableDiv;
-      const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-      if (distanceFromBottom <= 200) {
-        fetchMoreMatches();
-      }
-    }, 100);
-  };
-
-  afterNavigate(async () => {
-    try {
-      const _gb = await gb;
-      profile = await _gb.minimalAccountWithGamesPlayedLastWeek(id, {
-        gateway: Number.parseInt(gateway),
-      });
-      const leaderboard = await _gb.leaderboard({
-        seasonId: profile.currentSeason,
-      });
-      ranking =
-        (await profile.requestedProfile?.ranking(leaderboard.id)) ?? null;
-      try {
-        const acct = await profile.requestedProfile?.accountRankings(
-          leaderboard.id,
-        );
-        if (acct && acct.rankings) {
-          const reqGw = Number.parseInt(gateway);
-          otherRankings = acct.rankings.filter(
-            (r) => !(r.toon === id && Number(r.gatewayId) === reqGw),
-          );
-        }
-      } catch (e) {
-        console.warn("Failed to load other rankings", e);
-      }
-      // Wait for MatchesTable to register its fetcher then load initial entries
-      const start = Date.now();
-      while (!matchesTableFetchMore && Date.now() - start < 5000) {
-        await sleep(50);
-      }
-      if (matchesTableFetchMore) {
-        try {
-          await fetchUntilScrollbarOrEnd();
-        } catch (matchError) {
-          console.error("Failed to load initial matches:", matchError);
-        }
-      } else {
-        console.warn("MatchesTable fetcher not ready; skipping initial fetch");
-      }
-    } catch (error) {
-      console.error("Failed to load player data:", error);
-      goto(`/error?from=${encodeURIComponent(page.url.pathname)}`);
-    }
+    });
   });
 
   const winPercentage = $derived.by(() => {
@@ -289,12 +196,7 @@
   </Dialog.Content>
 </Dialog.Root>
 
-{#key id + gateway}
-  <div
-    class="w-full h-[100vh] overflow-y-scroll scroll-smooth pb-8"
-    onscroll={onScroll}
-    bind:this={scrollableDiv}
-  >
+<div class="w-full h-[100vh] overflow-y-scroll scroll-smooth pb-8">
     <div class="p-6 space-y-6">
       <div class="bg-muted/20 rounded-lg p-6">
         <div class="flex items-start justify-between gap-6">
@@ -320,34 +222,32 @@
                     <Race race={ranking.featureRace} />
                   </div>
                 {/if}
-                {#if savedPlayersStore}
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    class="h-9 w-9 cursor-pointer"
-                    onclick={toggleSave}
-                  >
-                    {#if isSaved}
-                      <BookmarkCheck class="h-4 w-4 text-green-500" />
-                    {:else}
-                      <Bookmark class="h-4 w-4" />
-                    {/if}
-                  </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  class="h-9 w-9 cursor-pointer"
+                  onclick={toggleSave}
+                >
                   {#if isSaved}
-                    <div class="flex items-center gap-2">
-                      <span class="text-sm text-muted-foreground"
-                        >Saved as: {savedDetails?.alias}</span
-                      >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        class="h-6 w-6"
-                        onclick={openEditAlias}
-                      >
-                        <Pencil class="h-3 w-3" />
-                      </Button>
-                    </div>
+                    <BookmarkCheck class="h-4 w-4 text-green-500" />
+                  {:else}
+                    <Bookmark class="h-4 w-4" />
                   {/if}
+                </Button>
+                {#if isSaved}
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-muted-foreground"
+                      >Saved as: {savedDetails?.alias}</span
+                    >
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      class="h-6 w-6"
+                      onclick={openEditAlias}
+                    >
+                      <Pencil class="h-3 w-3" />
+                    </Button>
+                  </div>
                 {/if}
               </div>
               {#if profile?.battleTag}
@@ -424,7 +324,21 @@
 
       <div class="bg-muted/20 rounded-lg p-4">
         <h2 class="text-sm font-medium mb-1">Other profiles</h2>
-        {#if otherRankings.length > 0}
+        {#if details === null}
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {#each Array(3) as _}
+              <div
+                class="flex items-center gap-3 p-3 rounded-md bg-background"
+              >
+                <Skeleton class="w-8 h-8 rounded-md" />
+                <div class="min-w-0 flex-1 space-y-1">
+                  <Skeleton class="h-4 w-24" />
+                  <Skeleton class="h-3 w-16" />
+                </div>
+              </div>
+            {/each}
+          </div>
+        {:else if otherRankings.length > 0}
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {#each otherRankings as r}
               <a
@@ -492,8 +406,6 @@
         {hideShortMatches}
         {profile}
         loading={!profile || !ranking}
-        onFetcherReady={(fn) => (matchesTableFetchMore = fn)}
       />
     </div>
   </div>
-{/key}

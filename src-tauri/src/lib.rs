@@ -43,11 +43,12 @@ fn init_process(window: Window, last_event: State<'_, Arc<LastScrEvent>>) {
 
     let last_event: Arc<LastScrEvent> = last_event.inner().clone();
     std::thread::spawn(move || {
-        let mut _listen = ScrProcessEventProvider::new(Arc::new(Mutex::new(move |event: ScrEvent| {
-            println!("event: {event:?}");
-            *last_event.0.lock().unwrap() = Some(event.clone());
-            let _ = window.emit("scr-event", event);
-        })));
+        let mut _listen =
+            ScrProcessEventProvider::new(Arc::new(Mutex::new(move |event: ScrEvent| {
+                println!("event: {event:?}");
+                *last_event.0.lock().unwrap() = Some(event.clone());
+                let _ = window.emit("scr-event", event);
+            })));
     });
 }
 

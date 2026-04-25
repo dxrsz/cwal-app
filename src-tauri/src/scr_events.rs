@@ -88,10 +88,7 @@ impl ScrProcessEventProvider {
 
                     if let Some(ev) = to_emit {
                         if last_emitted.as_ref() != Some(&ev) {
-                            append_log(&format!(
-                                "transition pid={:?} event={:?}",
-                                pid, ev
-                            ));
+                            append_log(&format!("transition pid={:?} event={:?}", pid, ev));
                             event_handler.lock().unwrap()(ev.clone());
                             last_emitted = Some(ev);
                         }

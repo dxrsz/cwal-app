@@ -197,215 +197,205 @@
 </Dialog.Root>
 
 <div class="w-full h-[100vh] overflow-y-scroll scroll-smooth pb-8">
-    <div class="p-6 space-y-6">
-      <div class="bg-muted/20 rounded-lg p-6">
-        <div class="flex items-start justify-between gap-6">
-          <div class="flex items-start gap-6">
-            <Avatar.Root class="w-20 h-20 flex-shrink-0 rounded-md">
-              <Avatar.Image
-                src={avatar}
-                alt="Player Avatar"
-                class="rounded-md"
-              />
-              <Avatar.Fallback class="text-xl font-bold rounded-md"
-                >{id.slice(0, 2).toUpperCase()}</Avatar.Fallback
-              >
-            </Avatar.Root>
+  <div class="p-6 space-y-6">
+    <div class="bg-muted/20 rounded-lg p-6">
+      <div class="flex items-start justify-between gap-6">
+        <div class="flex items-start gap-6">
+          <Avatar.Root class="w-20 h-20 flex-shrink-0 rounded-md">
+            <Avatar.Image src={avatar} alt="Player Avatar" class="rounded-md" />
+            <Avatar.Fallback class="text-xl font-bold rounded-md"
+              >{id.slice(0, 2).toUpperCase()}</Avatar.Fallback
+            >
+          </Avatar.Root>
 
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-4 mb-3">
-                <h1 class="text-3xl font-bold text-foreground">{id}</h1>
-                {#if ranking?.featureRace}
-                  <div
-                    class="px-3 py-1.5 bg-background rounded-md text-sm font-medium shadow-sm"
-                  >
-                    <Race race={ranking.featureRace} />
-                  </div>
-                {/if}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  class="h-9 w-9 cursor-pointer"
-                  onclick={toggleSave}
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-4 mb-3">
+              <h1 class="text-3xl font-bold text-foreground">{id}</h1>
+              {#if ranking?.featureRace}
+                <div
+                  class="px-3 py-1.5 bg-background rounded-md text-sm font-medium shadow-sm"
                 >
-                  {#if isSaved}
-                    <BookmarkCheck class="h-4 w-4 text-green-500" />
-                  {:else}
-                    <Bookmark class="h-4 w-4" />
-                  {/if}
-                </Button>
+                  <Race race={ranking.featureRace} />
+                </div>
+              {/if}
+              <Button
+                variant="outline"
+                size="icon"
+                class="h-9 w-9 cursor-pointer"
+                onclick={toggleSave}
+              >
                 {#if isSaved}
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm text-muted-foreground"
-                      >Saved as: {savedDetails?.alias}</span
-                    >
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      class="h-6 w-6"
-                      onclick={openEditAlias}
-                    >
-                      <Pencil class="h-3 w-3" />
-                    </Button>
-                  </div>
+                  <BookmarkCheck class="h-4 w-4 text-green-500" />
+                {:else}
+                  <Bookmark class="h-4 w-4" />
                 {/if}
-              </div>
-              {#if profile?.battleTag}
-                <div class="text-sm text-muted-foreground mb-2">
-                  <span class="font-mono">{profile.battleTag}</span>
+              </Button>
+              {#if isSaved}
+                <div class="flex items-center gap-2">
+                  <span class="text-sm text-muted-foreground"
+                    >Saved as: {savedDetails?.alias}</span
+                  >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    class="h-6 w-6"
+                    onclick={openEditAlias}
+                  >
+                    <Pencil class="h-3 w-3" />
+                  </Button>
                 </div>
               {/if}
             </div>
-          </div>
-
-          <div class="flex-shrink-0 space-y-3 text-right">
-            {#if profile?.countryCode}
-              <CountryFlag countryCode={profile.countryCode} />
+            {#if profile?.battleTag}
+              <div class="text-sm text-muted-foreground mb-2">
+                <span class="font-mono">{profile.battleTag}</span>
+              </div>
             {/if}
           </div>
         </div>
-      </div>
 
-      <div class="bg-muted/20 rounded-lg p-4">
-        {#if profile && ranking}
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-            <div class="space-y-1">
-              <div class="flex items-center justify-center gap-2">
-                <span class="text-lg font-bold"
-                  >#{ranking.rank || "Unranked"}</span
-                >
-                {#if ranking.tier}
-                  <Rank rank={ranking.tier} />
-                {/if}
-              </div>
-              {#if ranking.rating}
-                <span class="text-xs text-muted-foreground">
-                  {ranking.rating} MMR
-                </span>
+        <div class="flex-shrink-0 space-y-3 text-right">
+          {#if profile?.countryCode}
+            <CountryFlag countryCode={profile.countryCode} />
+          {/if}
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-muted/20 rounded-lg p-4">
+      {#if profile && ranking}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          <div class="space-y-1">
+            <div class="flex items-center justify-center gap-2">
+              <span class="text-lg font-bold"
+                >#{ranking.rank || "Unranked"}</span
+              >
+              {#if ranking.tier}
+                <Rank rank={ranking.tier} />
               {/if}
             </div>
-
-            <div class="space-y-1">
-              <div class="text-lg font-bold">
-                {profile.requestedProfile?.numGamesLastWeek || 0}
-              </div>
-              <p class="text-xs text-muted-foreground">Games This Week</p>
-            </div>
-
-            <div class="space-y-1">
-              <div class="text-lg font-bold">{winPercentage}</div>
-              <p class="text-xs text-muted-foreground">
-                Win Rate ({ranking?.wins || 0}W/{ranking?.losses || 0}L)
-              </p>
-            </div>
+            {#if ranking.rating}
+              <span class="text-xs text-muted-foreground">
+                {ranking.rating} MMR
+              </span>
+            {/if}
           </div>
-        {:else}
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-            <div class="space-y-1">
-              <div class="flex items-center justify-center gap-2">
-                <Skeleton class="h-6 w-16" />
-                <Skeleton class="h-5 w-6" />
-              </div>
-              <Skeleton class="h-3 w-20 mx-auto" />
+
+          <div class="space-y-1">
+            <div class="text-lg font-bold">
+              {profile.requestedProfile?.numGamesLastWeek || 0}
             </div>
-
-            <div class="space-y-1">
-              <Skeleton class="h-6 w-8 mx-auto" />
-              <Skeleton class="h-3 w-20 mx-auto" />
-            </div>
-
-            <div class="space-y-1">
-              <Skeleton class="h-6 w-12 mx-auto" />
-              <Skeleton class="h-3 w-24 mx-auto" />
-            </div>
+            <p class="text-xs text-muted-foreground">Games This Week</p>
           </div>
-        {/if}
-      </div>
 
-      <div class="bg-muted/20 rounded-lg p-4">
-        <h2 class="text-sm font-medium mb-1">Other profiles</h2>
-        {#if details === null}
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {#each Array(3) as _}
-              <div
-                class="flex items-center gap-3 p-3 rounded-md bg-background"
-              >
-                <Skeleton class="w-8 h-8 rounded-md" />
-                <div class="min-w-0 flex-1 space-y-1">
-                  <Skeleton class="h-4 w-24" />
-                  <Skeleton class="h-3 w-16" />
-                </div>
-              </div>
-            {/each}
+          <div class="space-y-1">
+            <div class="text-lg font-bold">{winPercentage}</div>
+            <p class="text-xs text-muted-foreground">
+              Win Rate ({ranking?.wins || 0}W/{ranking?.losses || 0}L)
+            </p>
           </div>
-        {:else if otherRankings.length > 0}
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {#each otherRankings as r}
-              <a
-                href="/player/{r.gatewayId}/{r.toon}"
-                class="flex items-center gap-3 p-3 rounded-md bg-background hover:bg-muted transition-colors"
-                onclick={(e) => {
-                  /* handled by default nav */
-                }}
-              >
-                <Avatar.Root class="w-8 h-8 rounded-md">
-                  <Avatar.Image
-                    src={avatarOrDefault(r.avatar)}
-                    alt={r.toon}
-                    class="rounded-md"
-                  />
-                </Avatar.Root>
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2">
-                    <span class="font-medium truncate max-w-[12rem]"
-                      >{r.toon}</span
-                    >
-                    {#if r.featureRace}
-                      <Race race={r.featureRace} />
-                    {/if}
-                  </div>
-                  <div
-                    class="text-xs text-muted-foreground flex items-center gap-2 mt-0.5"
-                  >
-                    {#if r.tier}
-                      <Rank rank={r.tier} />
-                    {/if}
-                    {#if r.rating}
-                      <span>{r.rating} MMR</span>
-                    {/if}
-                    <span>{r.gateway.name}</span>
-                  </div>
-                </div>
-              </a>
-            {/each}
-          </div>
-        {:else}
-          <p class="text-xs text-muted-foreground">
-            No other profiles on this account.
-          </p>
-        {/if}
-      </div>
-
-      <div class="flex items-center justify-between bg-muted/20 rounded-lg p-4">
-        <div class="space-y-1">
-          <label class="text-sm font-medium" for="hide-short-matches"
-            >Blur short matches</label
-          >
-          <p class="text-xs text-muted-foreground">
-            Blur matches shorter than 1 minute from the list
-          </p>
         </div>
-        <Switch
-          id="hide-short-matches"
-          bind:checked={hideShortMatches}
-          class="cursor-pointer"
-        />
-      </div>
+      {:else}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          <div class="space-y-1">
+            <div class="flex items-center justify-center gap-2">
+              <Skeleton class="h-6 w-16" />
+              <Skeleton class="h-5 w-6" />
+            </div>
+            <Skeleton class="h-3 w-20 mx-auto" />
+          </div>
 
-      <MatchesTable
-        {hideShortMatches}
-        {profile}
-        loading={!profile || !ranking}
+          <div class="space-y-1">
+            <Skeleton class="h-6 w-8 mx-auto" />
+            <Skeleton class="h-3 w-20 mx-auto" />
+          </div>
+
+          <div class="space-y-1">
+            <Skeleton class="h-6 w-12 mx-auto" />
+            <Skeleton class="h-3 w-24 mx-auto" />
+          </div>
+        </div>
+      {/if}
+    </div>
+
+    <div class="bg-muted/20 rounded-lg p-4">
+      <h2 class="text-sm font-medium mb-1">Other profiles</h2>
+      {#if details === null}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {#each Array(3) as _}
+            <div class="flex items-center gap-3 p-3 rounded-md bg-background">
+              <Skeleton class="w-8 h-8 rounded-md" />
+              <div class="min-w-0 flex-1 space-y-1">
+                <Skeleton class="h-4 w-24" />
+                <Skeleton class="h-3 w-16" />
+              </div>
+            </div>
+          {/each}
+        </div>
+      {:else if otherRankings.length > 0}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {#each otherRankings as r}
+            <a
+              href="/player/{r.gatewayId}/{r.toon}"
+              class="flex items-center gap-3 p-3 rounded-md bg-background hover:bg-muted transition-colors"
+              onclick={(e) => {
+                /* handled by default nav */
+              }}
+            >
+              <Avatar.Root class="w-8 h-8 rounded-md">
+                <Avatar.Image
+                  src={avatarOrDefault(r.avatar)}
+                  alt={r.toon}
+                  class="rounded-md"
+                />
+              </Avatar.Root>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="font-medium truncate max-w-[12rem]"
+                    >{r.toon}</span
+                  >
+                  {#if r.featureRace}
+                    <Race race={r.featureRace} />
+                  {/if}
+                </div>
+                <div
+                  class="text-xs text-muted-foreground flex items-center gap-2 mt-0.5"
+                >
+                  {#if r.tier}
+                    <Rank rank={r.tier} />
+                  {/if}
+                  {#if r.rating}
+                    <span>{r.rating} MMR</span>
+                  {/if}
+                  <span>{r.gateway.name}</span>
+                </div>
+              </div>
+            </a>
+          {/each}
+        </div>
+      {:else}
+        <p class="text-xs text-muted-foreground">
+          No other profiles on this account.
+        </p>
+      {/if}
+    </div>
+
+    <div class="flex items-center justify-between bg-muted/20 rounded-lg p-4">
+      <div class="space-y-1">
+        <label class="text-sm font-medium" for="hide-short-matches"
+          >Blur short matches</label
+        >
+        <p class="text-xs text-muted-foreground">
+          Blur matches shorter than 1 minute from the list
+        </p>
+      </div>
+      <Switch
+        id="hide-short-matches"
+        bind:checked={hideShortMatches}
+        class="cursor-pointer"
       />
     </div>
+
+    <MatchesTable {hideShortMatches} {profile} loading={!profile || !ranking} />
   </div>
+</div>

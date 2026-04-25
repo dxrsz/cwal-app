@@ -12,7 +12,7 @@ use std::sync::{atomic::AtomicBool, Arc, Mutex};
 
 use cache::ReplayCache;
 use replay_parser::ReplayParser;
-use scr_events::ScrProcessEventProvider;
+use scr_events::{ScrEvent, ScrProcessEventProvider};
 use tauri::path::BaseDirectory;
 use tauri::Manager;
 use tauri::State;
@@ -20,20 +20,33 @@ use tauri::Window;
 
 static INITIALIZED: AtomicBool = AtomicBool::new(false);
 
+// Shared snapshot of the last event the polling thread emitted. Lets us
+// answer "what's the current SC state?" for late or reconnecting frontend
+// listeners (initial-load race, dev HMR, manual page reload). Without this,
+// transition-only emits leave a fresh listener stuck on Indeterminate
+// because the backend never gets another transition to broadcast.
+struct LastScrEvent(Mutex<Option<ScrEvent>>);
+
 #[tauri::command]
-fn init_process(window: Window) {
+fn init_process(window: Window, last_event: State<'_, Arc<LastScrEvent>>) {
+    // Re-emit current state so a freshly-attached listener learns where we
+    // are. Safe to do unconditionally — the frontend treats events
+    // idempotently.
+    if let Some(ev) = last_event.0.lock().unwrap().clone() {
+        let _ = window.emit("scr-event", ev);
+    }
+
     if INITIALIZED.load(std::sync::atomic::Ordering::Relaxed) {
         return;
     }
-
     INITIALIZED.store(true, std::sync::atomic::Ordering::Relaxed);
 
+    let last_event: Arc<LastScrEvent> = last_event.inner().clone();
     std::thread::spawn(move || {
-        let window = Mutex::new(Arc::new(window));
-        let mut _listen = ScrProcessEventProvider::new(Arc::new(Mutex::new(move |event| {
+        let mut _listen = ScrProcessEventProvider::new(Arc::new(Mutex::new(move |event: ScrEvent| {
             println!("event: {event:?}");
-            let window = window.lock().unwrap();
-            window.emit("scr-event", event).unwrap();
+            *last_event.0.lock().unwrap() = Some(event.clone());
+            let _ = window.emit("scr-event", event);
         })));
     });
 }
@@ -229,6 +242,10 @@ pub fn run() {
                 });
             let cache = Arc::new(ReplayCache::new(cache_dir, 1000));
             app.manage(cache);
+
+            let last_event: Arc<LastScrEvent> = Arc::new(LastScrEvent(Mutex::new(None)));
+            app.manage(last_event);
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

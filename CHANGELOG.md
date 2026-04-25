@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-04-25
+
+### Fixed
+
+- Saved player profiles no longer get overwritten with an opponent's data after navigating between profiles
+- StarCraft online/offline indicator no longer flickers; transient detection misses are now tolerated and a reconnecting UI immediately learns the current state
+- Eliminated the white/gray flash that appeared on app launch before the dark theme was applied
+
 ## [0.7.0] - 2025-12-30
 
 ### Fixed
